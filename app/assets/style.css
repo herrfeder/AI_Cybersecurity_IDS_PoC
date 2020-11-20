@@ -1,0 +1,49 @@
+h2 {
+    color: orange;
+}
+
+h5 {
+    color: orange;
+}
+
+.card-header {
+    background-color: #073642;
+}
+
+.rc-slider-track {
+  background-color: #008080;
+}
+
+.rc-slider-vertical .rc-slider-mark {
+    top: -65px;
+    left: 18px;
+    height: 100%;
+    width: 150px;
+}
+
+.rc-slider-mark-text {
+    font-size : 14px;
+    color: #2AA198;
+}
+
+
+.rc-slider-rail {
+  background-color: #008080;
+}
+
+.rc-slider-dot-active {  
+  border-color: #00FF00;
+}
+
+.rc-slider-handle {
+  background-color: #C0C0C0;
+  border-color: #C0C0C0;
+}
+
+.rc.slider-handle:hover {
+  border-color: blue;
+}
+
+.rc.slider-handle-active:active {
+  border-color: red;
+}

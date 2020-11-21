@@ -53,20 +53,16 @@ for day in FORE_DAYS:
 
 
 # Lists for Project Menu    
-acc_str_list = ["A Introduction",
-                "B View Data", 
-                "C Correlation Analysis",
-                "D Causality Analysis",
-                "E Model Evaluation",
-                "F Forecast"]
+acc_str_list = ["STATIC ANALYSIS",
+                "MONITOR TRAFFIC",
+                "CRAWL N TRAIN", 
+                "APPLY MODEL"
+                ]
 
-acc_slider_list = [["Introduction", "Resources"],
-                   ["View Data","Conclusions"],
-                   ["Simple Correlation", "Correlation Timeshift", "Conclusions"],
-                   ["Seasonal Analysis", "Granger Causality", "Conclusions"],
-                   ["ARIMAX", "GRU", "Conclusions"],
-                   ["Forecast", "$ Buying Simulation $", "Chances and next Steps"]]
-    
+svg_icon_src = ["https://raw.githubusercontent.com/herrfeder/herrfeder.github.io/master/daten-kreisdiagramm.svg",
+                "https://raw.githubusercontent.com/herrfeder/herrfeder.github.io/master/monitor.svg",
+                "https://raw.githubusercontent.com/herrfeder/herrfeder.github.io/master/164053.svg",
+                "https://raw.githubusercontent.com/herrfeder/herrfeder.github.io/master/cloud-computing.svg"]
 
 
 ### Prepared Visualisations for speeding up web app ###
@@ -74,8 +70,13 @@ acc_slider_list = [["Introduction", "Resources"],
 GRANGER_PATH = APP_PATH.joinpath("data/granger_causality.csv")
 GRANGER_PLOT = ph.return_granger_plot(GRANGER_PATH, title="", colormap="viridis_r", dash=True)
 
-VIEW_DATA_FIG = ph.exploratory_plot(do_big.apply_boll_bands("bitcoin_hist",
-                                                              append_chart=False), title="", dash=True)
+#VIEW_DATA_FIG = ph.exploratory_plot(do_big.apply_boll_bands("bitcoin_hist",
+#                                                              append_chart=False), title="", dash=True)
+
+
+
+VIEW_DATA_FIG =  ph.get_data_table_2("", fig="", title="")
+
 
 CORR_STATIC_FIG = ph.plot_val_heatmap(do_big.chart_df[small_col_set].corr(), 
                                           title="", 
@@ -97,7 +98,7 @@ CROSS_VAL_GRU = ph.return_cross_val_plot(do_big.cross_validate_gru(),
 
 ### Assistance Functions for creating HTML content ###
 
-def make_items(acc_str_list, acc_slider_list):
+def make_items(acc_str_list, svg_icon_src):
     '''
     Populates Bootstrap accordion Menu with sub menu sliders from given input arguments.
     The given DOM id's are crucial for app callbacks, therefore shouldn't be modified.
@@ -109,55 +110,54 @@ def make_items(acc_str_list, acc_slider_list):
         card_list - (list of dash HTML objects) Will hold all menu points and submenu slider 
     '''
     card_list = []
-    for acc_str, acc_slider in zip(acc_str_list, acc_slider_list):
-        card_list.append(dbc.Card(
-            [
-                dbc.CardHeader(
-                        dbc.Row([
-                            html.Span(id=f"spandot-{acc_str}",
-                                      style={"height": "15px", 
-                                             "width": "15px", 
-                                             "background-color": "#bbb", 
-                                             "border-radius": "50%",
-                                             "padding-left": 20
-                                             }
-                                     ),
-                        dbc.Button(
-                            f"{acc_str}",
-                            color="link",
-                            id=f"group-{acc_str}-toggle",
-                            style={"padding-top":10}
+    for acc_str, svg_icon in zip(acc_str_list, svg_icon_src):
+        card_list.append(html.Div(
+            id=f"menuitem-{acc_str}",
+            children=[
+                dbc.CardHeader([
+                    dbc.Row([
+                        html.Span(id=f"spandot-{acc_str}",
+                                    style={"height": "50px", 
+                                            "width": "50px", 
+                                            "background-color": "#bbb", 
+                                            "border-radius": "20%",
+                                            "padding-left": "5px",
+                                            "align-items": "center",
+                                            "display": "grid",
+                                            "margin": "0 auto",
+                                            },
+                                    children=[
+                                        html.Span(id=f"spandoti-{acc_str}",
+                                            style={    
+                                                "height": "40px",
+                                                "width": "40px",
+                                                "background-image": f"url({svg_icon})",
+                                                "background-repeat": "no-repeat",
+                                                "display": "grid"
+                                                }
+                                                )]
+                                        
+                                    ),
+                    dbc.Button(
+                        f"{acc_str}",
+                        id=f"button-{acc_str}",
+                        color="link",
+                        style={"padding-top":10,
+                            "align": "center"}
 
-                            )
-                        ],style={"display":"inline-flex", 
-                                 "align-items":"center",
-                                 "padding-left":20} 
-                        ) 
-                    ),
-
-
-                dbc.Collapse(
-                    html.Div(children=[dbc.Col(
-                                dcc.Slider(
-                                        id = f"slider-{acc_str}",
-                                        updatemode = "drag",
-                                        vertical = True,
-                                        step=None,
-                                        marks = {index: {"label":"{}".format(name),
-                                                         "style": {"color": "#2AA198"}
-                                                        } for index,name in enumerate(acc_slider[::-1])},
-                                        min=0,
-                                        max=len(acc_slider)-1,
-                                        value=len(acc_slider)-1,
-                                        verticalHeight=len(acc_slider)*50)
-                            ),
-                            dbc.Col(html.P(id=f"slidersub-{acc_str}", 
-                                           style={"color":"orange"}), 
-                                    id=f"slider-content-{acc_str}")],
-                            style={"padding":10, "padding-left":20}), id=f"collapse-{acc_str}"       
-                )
-            ])
-    )
+                        )
+                    ], className="menurow", 
+                    id=f"row-{acc_str}",
+                    style={"display":"inline-flex", 
+                                "align-items":"center",
+                                "padding-left":20,
+                                "padding-right":20} 
+                    )
+                ], className="menucard", 
+                id=f"menucard-{acc_str}"
+        )
+    ]))
+    
          
     return card_list
 
@@ -204,9 +204,11 @@ NAVBAR = dbc.Navbar(
        
             dbc.Row(
                 [
-                    dbc.Col(html.A(html.Img(src="https://upload.wikimedia.org/wikipedia/commons/3/3b/Udacity_logo.png", height="40px"), href="https://www.udacity.com"), width=1),
-                    dbc.Col(dbc.NavbarBrand(dbc.Row([html.P("DataScience Nanodegree Capstone Project ►", style={"color":"#02b3e4"}),
-                                                     html.P("Multivariate Timeseries Analysis (Stock Market)")], align="center")), width=9),
+                    dbc.Col(html.A(html.Img(src="https://upload.wikimedia.org/wikipedia/commons/2/21/BWI_GmbH_logo.svg", height="40px"), href="https://www.udacity.com"), width=1),
+                    dbc.Col(dbc.NavbarBrand(dbc.Row([html.P("BWI Datalytics Hackathon 2020 ►", style={"color":"#ff0000"}),
+                                                     html.P("BroAI"),
+                                                     html.P("&Nbsp;(KI - Cyber Security)", style={"color":"grey"})], align="center")), width=9),
+                                                     
                     dbc.Col(dbc.DropdownMenu(
                         children=[
                             dbc.DropdownMenuItem("LinkedIn",
@@ -240,14 +242,8 @@ NAVBAR = dbc.Navbar(
 
 LEFT_COLUMN = dbc.Jumbotron(
     [
-        html.H4(children="Project Menu", className="display-5"),
-        html.P(
-            "(Click A Field to continue)",
-            style={"fontSize": 12, "font-weight": "lighter"},
-        ),
-        html.Hr(className="my-2"),
-        html.Div(make_items(acc_str_list, acc_slider_list), className="accordion"),   
-    ]
+        html.Div(make_items(acc_str_list, svg_icon_src), className="accordion"),   
+    ], style={"padding": "0rem 1rem 1rem 1rem"}
 )
 
 RIGHT_COLUMN = html.Div(id="right_column", children=[html.Div(id="right_column_loading")])
@@ -256,10 +252,10 @@ RIGHT_COLUMN = html.Div(id="right_column", children=[html.Div(id="right_column_l
 BODY = dbc.Container([
             dbc.Row(
                 [
-                    dbc.Col(LEFT_COLUMN, md=3),
-                    dbc.Col(RIGHT_COLUMN, md=9),
+                    dbc.Col(LEFT_COLUMN, md=1),
+                    dbc.Col(RIGHT_COLUMN, md=11),
                 ],
-                style={"marginTop": 30},
+                style={"marginTop": 20},
             ),
             dbc.Row(
                 [
@@ -281,10 +277,11 @@ RESOURCES = html.Div(dcc.Markdown(conclusion_texts.resources), id="resources")
 
 # B VIEW DATA
 
-EXP_CHART_PLOT = [dbc.CardHeader(html.H5("Historic Input Datasets")),
-              dbc.CardBody(dcc.Loading(dcc.Graph(id="exp_chart_plot",
-                           figure=VIEW_DATA_FIG)))
-             ]
+EXP_CHART_PLOT = [dbc.CardHeader(html.H5("BRO List")),
+                  dbc.CardBody(html.Div(children=[ 
+                        html.Div(dcc.Loading(VIEW_DATA_FIG,id="data_table"))
+                        ]))
+                 ]
 
 VIEW_CONCLUSIONS = html.Div(dcc.Markdown(conclusion_texts.view_data_conclusion), id="resources")
 
@@ -647,8 +644,8 @@ CHANCES_ROADMAP =  html.Div(dcc.Markdown(conclusion_texts.chances_roadmap), id="
 ### WEBAPP INIT ###
 
 app = dash.Dash(__name__, 
-                external_stylesheets=[dbc.themes.SOLAR], 
-                url_base_pathname="/bitcoinprediction/",
+                external_stylesheets=[dbc.themes.DARKLY], 
+                url_base_pathname="/aicspoc/",
                 meta_tags=[
                     {"name": "viewport", "content": "width=device-width, initial-scale=1.0"}
                 ],
@@ -665,16 +662,13 @@ server = app.server
 ### CALLBACKS ###
 
 # Menu control function
-acc_input = [Input(f"group-{i}-toggle", "n_clicks") for i in acc_str_list]
-acc_input.extend([Input(f"slider-{i}", "value") for i in acc_str_list])
+acc_input = [Input(f"menuitem-{i}", "n_clicks") for i in acc_str_list]
 @app.callback(
     Output("right_column_loading", "children"),
     acc_input,
     [State("right_column_loading", "children")],
 )    
-def show_plot(acc_01, acc_02, acc_03, acc_04, acc_05, acc_06,
-              sli_01, sli_02, sli_03, sli_04, sli_05, sli_06,
-              figure):
+def show_plot(acc_01, acc_02, acc_03, acc_04, right_children):
     '''
     This function returns the HTML content into the right column of web app based
     on the clicked accordion button and clicked submenu slider value
@@ -687,205 +681,76 @@ def show_plot(acc_01, acc_02, acc_03, acc_04, acc_05, acc_06,
         element_id = ctx.triggered[0]["prop_id"].split(".")[0]
 
     if (acc_str_list[0] in element_id):
-        if sli_01 == 1:
-            return INTRODUCTION
-        if sli_01 == 0:
-            return RESOURCES
+        return EXP_CHART_PLOT
         
     elif (acc_str_list[1] in element_id):
-        if sli_02 == 1:
-            return EXP_CHART_PLOT
-        if sli_02 == 0:
-            return VIEW_CONCLUSIONS
+        return ""
         
     elif (acc_str_list[2] in element_id):
-        if sli_03 == 2:
-            return CORR_01_CHART_PLOT
-        elif sli_03 == 1:
-            return CORR_02_CHART_PLOT
-        elif sli_03 == 0:
-            return CORR_CONCLUSIONS
+        return ""
         
     elif (acc_str_list[3] in element_id):
-        if sli_04 == 2:
-            return CAUS_SEASONAL_PLOT
-        if sli_04 == 1:
-            return CAUS_GRANGER_PLOT
-        if sli_04 == 0:
-            return CAUS_CONCLUSIONS
-        
-    elif (acc_str_list[4] in element_id):
-        if sli_05 == 2:
-            return MODEL_SARIMAX_EVAL
-        if sli_05 == 1:
-            return MODEL_GRU_EVAL
-        if sli_05 == 0:
-            return MODEL_CONCLUSIONS
-        
-    elif (acc_str_list[5] in element_id):
-        if sli_06 == 2:
-            return FORE_ALL
-        if sli_06 == 1:
-            return BUY_SELL_SIM
-        if sli_06 == 0:
-            return CHANCES_ROADMAP
-    else:
-        return FORE_ALL
-
-        
-# Control Accordion animation
-@app.callback(
-    [Output(f"collapse-{i}", "is_open") for i in acc_str_list],
-    [Input(f"group-{i}-toggle", "n_clicks") for i in acc_str_list],
-    [State(f"collapse-{i}", "is_open") for i in acc_str_list],
-)
-def toggle_accordion(n1, n2, n3, n4, n5, n6,
-                     is_open1, is_open2, is_open3, is_open4, is_open5, is_open6):
-    '''
-    This function collapses the single Accordion Buttons based on click events
-    '''
-    ctx = dash.callback_context
-
-    if not ctx.triggered:
         return ""
     else:
-        button_id = ctx.triggered[0]["prop_id"].split(".")[0]
-
-    if (acc_str_list[0] in button_id) and n1:
-        return not is_open1, False, False, False, False, False
-    elif (acc_str_list[1] in button_id) and n2:
-        return False, not is_open2, False, False, False, False
-    elif (acc_str_list[2] in button_id) and n3:
-        return False, False, not is_open3, False, False, False
-    elif (acc_str_list[3] in button_id) and n4:
-        return False, False, False, not is_open4, False, False
-    elif (acc_str_list[4] in button_id) and n5:
-        return False, False, False, False, not is_open5, False
-    elif (acc_str_list[5] in button_id) and n6:
-        return False, False, False, False, False, not is_open6
-    else:
-        return False, False, False, False, False, not is_open6
-
-
-
-# List for Output of Slider Subtitle HTML elements
-output=[]
-output.extend([Output(f"slidersub-{i}", "children") for i in acc_str_list])
-
-# List for State of Slider Subtitle HTML elements
-state=[]
-state.extend([State(f"slidersub-{i}", "children") for i in acc_str_list])
-
-
-# Control Subtitle Output below submenu slider
-@app.callback(
-    output,
-    acc_input,
-    state,
-)    
-def update_sub(acc_01, acc_02, acc_03, acc_04, acc_05, acc_06,
-              sli_01, sli_02, sli_03, sli_04, sli_05, sli_06,
-              slisub_01, slisub_02, slisub_03, slisub_04, slisub_05, slisub_06):
-    '''
-    Based on click events on accordion buttons and submenu sliders the subtitle
-    texts below each submenu slider will be updated
-    '''
-    ctx = dash.callback_context
-
-    if not ctx.triggered:
-        return "", "", "", "", "", ""
-    else:
-        element_id = ctx.triggered[0]["prop_id"].split(".")[0]
-
+        return ""
         
-    if (acc_str_list[0] in element_id):
-        if sli_01 == 1:
-            return "See Explanation for this Project", "", "", "", "", ""
-        elif sli_01 == 0:
-            return "See Used Resources", "", "", "", "", ""
-    elif (acc_str_list[1] in element_id):
-        if sli_02 == 1:
-            return "", "See all investigated Input Time Series", "", "", "", ""
-        elif sli_02 == 0:
-            return "","See Conclusions about Input Time Series","", "", "", ""
-    elif (acc_str_list[2] in element_id):
-        if sli_03 == 2:
-            return "","", "See correlational Analysis of Time Series", "", "", ""
-        elif sli_03 == 1:
-            return "","See correlational between timeshifted Time Series", "", "", "", ""
-        elif sli_03 == 0:
-            return "", "", "See Conclusions resulting from Correlation Analysis", "", "", ""
-    elif (acc_str_list[3] in element_id):
-        if sli_04 == 2:
-            return "", "", "", "See Seasonal Decomposition for Time Series", "", ""
-        elif sli_04 == 1:
-            return "", "", "", "See Granger Causality for Time Series", "", ""
-        elif sli_04 == 0:
-            return "", "", "", "See Conclusions resulting from Causality Analysis", "", ""
-    elif (acc_str_list[4] in element_id):
-        if sli_05 == 2:
-            return "", "", "", "", "See Cross Validation Results for SARIMAX Model", ""
-        elif sli_05 == 1:
-            return "", "", "", "", "See Cross Validation Results for GRU Model", ""
-        elif sli_05 == 0:
-            return "", "", "", "", "See Conclusions for Model Evaluation", ""
-    elif (acc_str_list[5] in element_id):
-        if sli_06 == 2:
-            return "", "", "", "", "", "See manual daily forecast for Bitcoin Price"
-        elif sli_06 == 1:
-            return "", "", "", "", "", "See Buy & Sell Market Simulation"
-        elif sli_06 == 0:
-            return "", "", "", "", "", "See Conclusions and Outlook"
-    else:
-        return "", "", "", "", "", "See manual daily forecast for Bitcoin Price"
-
     
+
+            
 # controls green color of menu dot    
 @app.callback(
-    [Output(f"spandot-{i}", "style") for i in acc_str_list],
-    [Input(f"group-{i}-toggle", "n_clicks") for i in acc_str_list],
-    [State(f"spandot-{i}", "style") for i in acc_str_list],
+    [Output(f"spandoti-{i}", "style") for i in acc_str_list],
+    [Input(f"menuitem-{i}", "n_clicks") for i in acc_str_list],
+    [State(f"spandoti-{i}", "style") for i in acc_str_list],
 )
-def toggle_active_dot(n1, n2, n3, n4, n5, n6, 
-                      active1, active2, active3, active4, active5, active6):
+def toggle_active_dot(n1, n2, n3, n4,
+                      active1, active2, active3, active4):
     '''
     Based on click events on the accordion button the style of the spandot in each accordion button
     will be updated
     '''
     
-    sty_na={"height": "15px", 
-           "width": "15px", 
-           "background-color": "#bbb", 
-           "border-radius": "50%",
-            }
+    sty_na={"height": "50px", 
+            "width": "50px", 
+            "background-color": "#bbb", 
+            "border-radius": "20%",
+            "padding-left": "5px",
+            "align-items": "center",
+            "display": "grid",
+            "margin": "0 auto",
+            },
     
-    sty_a={"height": "15px", 
-           "width": "15px", 
-           "background-color": "#00FF00", 
-           "border-radius": "50%",
+    sty_a={"height": "50px", 
+            "width": "50px", 
+            "background-color": "#00FF00", 
+            "border-radius": "20%",
+            "padding-left": "5px",
+            "align-items": "center",
+            "display": "grid",
+            "margin": "0 auto",
             }
     
     ctx = dash.callback_context
 
     if not ctx.triggered:
-        return ""
+        return sty_na, sty_na, sty_na, sty_na
+        print("not_triggered")
     else:
         button_id = ctx.triggered[0]["prop_id"].split(".")[0]
+        print(button_id)
 
-    if (acc_str_list[0] in button_id) and n1:
-        return sty_a, sty_na, sty_na, sty_na, sty_na, sty_na
-    elif (acc_str_list[1] in button_id) and n2:
-        return sty_na, sty_a, sty_na, sty_na, sty_na, sty_na
-    elif (acc_str_list[2] in button_id) and n3:
-        return sty_na, sty_na, sty_a, sty_na, sty_na, sty_na
-    elif (acc_str_list[3] in button_id) and n4:
-        return sty_na, sty_na, sty_na, sty_a, sty_na, sty_na 
-    elif (acc_str_list[4] in button_id) and n5:
-        return sty_na, sty_na, sty_na, sty_na, sty_a, sty_na 
-    elif (acc_str_list[5] in button_id) and n6:
-        return sty_na, sty_na, sty_na, sty_na, sty_na, sty_a
+    if (acc_str_list[0] in button_id):
+        print("button 1 pressed")
+        return sty_a, sty_na, sty_na, sty_na
+    elif (acc_str_list[1] in button_id):
+        return sty_na, sty_a, sty_na, sty_na
+    elif (acc_str_list[2] in button_id):
+        return sty_na, sty_na, sty_a, sty_na
+    elif (acc_str_list[3] in button_id):
+        return sty_na, sty_na, sty_na, sty_a
     else:
-        return sty_na, sty_na, sty_na, sty_na, sty_na, sty_a
+        return sty_na, sty_na, sty_na, sty_na
+    
            
 
 # belongs to F, outputs forecast

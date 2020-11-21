@@ -47,3 +47,25 @@ h5 {
 .rc.slider-handle-active:active {
   border-color: red;
 }
+
+g:hover {
+    background-color: "green";
+}
+
+tr:hover {
+    color: green;
+    border-color: green;
+}
+
+.col-md-1 {
+    padding-left: 0px;
+    padding-right: 15px;
+}
+
+.menucard {
+    border-top: 15px solid #303030;
+}
+
+.menucard:hover {
+    background-color: #3d7f7f;
+}

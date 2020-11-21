@@ -4,6 +4,8 @@ from statsmodels.tsa.seasonal import seasonal_decompose
 from pandas.tseries.offsets import DateOffset
 import pandas as pd
 import numpy as np
+import dash_table
+from ipdb import set_trace
 
 
 def apply_layout(fig, title="", height=1250):
@@ -35,6 +37,90 @@ def apply_layout(fig, title="", height=1250):
 
     return fig
 
+
+def temp_style():
+
+    df['Rating'] = df['Humidity'].apply(lambda x:
+    '⭐⭐⭐' if x > 30 else (
+    '⭐⭐' if x > 20 else (
+    '⭐' if x > 10 else ''   
+    )))
+    df['Growth'] = df['Temperature'].apply(lambda x: '↗️' if x > 0 else '↘️')
+    df['Status'] = df['Temperature'].apply(lambda x: '🔥' if x > 0 else '🚒')
+    app.layout = dash_table.DataTable(
+    data=df.to_dict('records'),
+    columns=[
+        {"name": i, "id": i} for i in df.columns
+    ],)
+
+
+def get_data_table_2(df, fig="", title=""):
+
+    df = pd.read_csv('https://raw.githubusercontent.com/plotly/datasets/master/2014_usa_states.csv')
+    dt = dash_table.DataTable(
+        id='datatable-row-ids',
+        columns=[
+            {'name': i, 'id': i, 'deletable': True} for i in df.columns
+            # omit the id column
+            if i != 'id'
+            ],
+        data=df.to_dict('records'),
+        editable=True,
+        filter_action="native",
+        sort_action="native",
+        sort_mode='multi',
+        row_selectable='multi',
+        row_deletable=True,
+        selected_rows=[],
+        page_action='native',
+        page_current= 0,
+        page_size= 100,
+        style_as_list_view=True,
+        style_data_conditional=[
+            {
+                'if': {'row_index': 'odd'},
+                'backgroundColor': 'rgb(50, 50, 50)'
+            },
+            {
+                'if': {'row_index': 'even'},
+                'backgroundColor': 'rgb(50, 70, 50)'
+            },
+
+        ],
+        style_header={
+            'backgroundColor': 'rgb(140, 0, 0)',
+            'fontWeight': 'bold'
+            },
+        style_cell={ 'border': '10px solid #222' },
+    )
+
+    
+   
+    return dt
+
+def get_data_table(df, fig="", title="", dash=False):
+  
+    df = pd.read_csv('https://raw.githubusercontent.com/plotly/datasets/master/2014_usa_states.csv')
+
+    fig = go.Figure(data=[go.Table(row_deletable=True,
+        header=dict(values=list(df.columns),
+                    line_color='#303030',
+                    line={'width':10},
+                    height=30,  
+                    fill_color='grey',
+                    align='center'),
+        cells=dict(values=[df.Rank, df.State, df.Postal, df.Population],
+                line_color='#303030',
+                line={'width':10},
+                height=30,  
+                fill_color='grey',
+                align='center'))
+    ])
+
+    if dash:
+        return apply_layout(fig, title)
+    else:
+        fig.show()
 
 
 def get_gru_plot(df, fig="", title="", dash=False):

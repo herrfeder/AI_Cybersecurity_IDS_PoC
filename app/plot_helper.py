@@ -83,7 +83,7 @@ def get_data_table_2(df, fig="", title=""):
             },
             {
                 'if': {'row_index': 'even'},
-                'backgroundColor': 'rgb(50, 70, 50)'
+                'backgroundColor': 'rgb(50, 60, 50)'
             },
 
         ],
@@ -92,6 +92,7 @@ def get_data_table_2(df, fig="", title=""):
             'fontWeight': 'bold'
             },
         style_cell={ 'border': '10px solid #222' },
+        style_table= {'overflowY': 'auto'}
     )
 
     

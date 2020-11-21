@@ -69,3 +69,31 @@ tr:hover {
 .menucard:hover {
     background-color: #3d7f7f;
 }
+
+.menuicon-inactive {
+    height: 50px; 
+    width: 50px; 
+    background-color: #bbb; 
+    border-radius: 20%;
+    padding-left: 5px;
+    align-items: center;
+    display: grid;
+    margin: 0 auto;
+}
+
+.menuicon-active {
+    height: 50px; 
+    width: 50px; 
+    background-color: #00FF00; 
+    border-radius: 20%;
+    padding-left: 5px;
+    align-items: center;
+    display: grid;
+    margin: 0 auto;
+}
+
+.btn-link {
+    font-weight: 400;
+    color: orange;
+    text-decoration: none;
+}

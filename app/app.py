@@ -104,36 +104,7 @@ def make_items(acc_str_list, svg_icon_src):
 
 
 
-def build_growth_content(growth_dict, cols):
-    '''
-    Populates table like HTML Elements from input dict. Used for seeing mean growth in percent of specific time series over time.
-    Will color entry red for negative growth and green for positive growth.
-    
-    INPUT:
-        growth_dict - ({str:float}) Holds column name as key and growth index as value
-        cols - (list of str) Holds the column names that should be populated from input dict
-    OUTPUT:
-        dbc.Row - (dash HTML object) Holds the table like HTML elements
-    '''
-    
-    col_col = []
-    val_col = []
-    
-    for col in cols:
-        val = growth_dict[col]
-        if val >= 0:
-            color="green"
-        else:
-            color="red"
-          
-        col_name = col.split("_")[0]
-        col_col.append(dbc.Row(html.P(col_name,style={"color":color}),style={"height":"25px"}))
-        val_col.append(dbc.Row(html.P(str(val)+"%",style={"color":color, "font-weight":"bold"}), style={"height":"25px"}))
-    
-    left_col = dbc.Col(col_col, width=8)
-    right_col = dbc.Col(val_col, width=4)
-    
-    return dbc.Row(children=[left_col, right_col])
+
                     
                     
 ### BASIC WEB APP LAYOUT ###

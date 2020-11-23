@@ -1,11 +1,7 @@
 from json import loads, dumps
 from collections import OrderedDict
-from elasticsearch import Elasticsearch, helpers
 from datetime import datetime
 from traceback import print_exc
-from os import fdopen
-from os import O_RDONLY
-from ipdb import set_trace
 
 
 class ParseZeekLogs(object):
@@ -16,8 +12,14 @@ class ParseZeekLogs(object):
 
     """
 
-    def __init__(self, filepath="", fd="", batchsize=500, fields=None, types=None, output_format=None, ignore_keys=[], meta={}, safe_headers=False):
-        self.fd = open(filepath,"r")
+    def __init__(self, filepath="", fd="", batchsize=500, fields=None, types=None, 
+                seperator=None, set_seperator=None, empty_field=None, unset_field=None,
+                output_format=None, ignore_keys=[], meta={}, safe_headers=False):
+        
+        if filepath:
+            self.fd = open(filepath,"r")
+        elif fd:
+            self.fd = fd
         self.options = OrderedDict()
         self.firstRun = True
         self.filtered_fields = fields
@@ -32,31 +34,50 @@ class ParseZeekLogs(object):
 
         # Read the header option lines
         l = self.fd.readline().strip()
-        while l.strip().startswith("#"):
-            # Parse the options out
-            if l.startswith("#separator"):
-                key = str(l[1:].split(" ")[0])
-                value = str.encode(l[1:].split(" ")[1].strip()).decode('unicode_escape')
-                self.options[key] = value
-            elif l.startswith("#"):
-                key = str(l[1:].split(self.options.get('separator'))[0])
-                value = l[1:].split(self.options.get('separator'))[1:]
-                self.options[key] = value
+        print(l)
+        if l.strip().startswith("#"):
+            while l.strip().startswith("#"):
+                # Parse the options out
+                if l.startswith("#separator"):
+                    key = str(l[1:].split(" ")[0])
+                    value = str.encode(l[1:].split(" ")[1].strip()).decode('unicode_escape')
+                    self.options[key] = value
+                elif l.startswith("#"):
+                    key = str(l[1:].split(self.options.get('separator'))[0])
+                    value = l[1:].split(self.options.get('separator'))[1:]
+                    self.options[key] = value
 
-            # Read the next line
-            l = self.fd.readline().strip()
+                # Read the next line
+                l = self.fd.readline().strip()
 
-        self.firstLine = l
+            self.firstLine = l
 
-        # Save mapping of fields to values:
-        self.fields = fields
-        
-        self.types = types
+            # Save mapping of fields to values:
+            self.fields = self.options.get('fields')
+            self.types = self.options.get('types')
+            self.seperator = self.options.get('seperator')
+            self.set_seperator = self.options.get('set_seperator')
+            self.empty_field = self.options.get('empty_field')
+            self.unset_field = self.options.get('unset_field')
+            print("in if")
+            print(self.fields)
+        else:
+            print("in else")
+            self.fields = fields
+            self.types = types
+            self.seperator = seperator
+            self.set_seperator = set_seperator
+            self.empty_field = empty_field
+            self.unset_field = unset_field
+            
+            self.firstLine = l
+        print(self.fields)
+
 
         # Convert field names if safe_headers is enabled
-        #if self.safe_headers is True:
-        #    for i, val in enumerate(self.fields):
-        #        self.fields[i] = self.fields[i].replace(".", "_")
+        if self.safe_headers is True:
+            for i, val in enumerate(self.fields):
+                self.fields[i] = self.fields[i].replace(".", "_")
 
         self.data_types = {}
         for i, val in enumerate(self.fields):
@@ -66,8 +87,6 @@ class ParseZeekLogs(object):
 
             # Match types with each other
             self.data_types[self.fields[i]] = self.types[i]
-
-        
 
     def __del__(self):
         self.fd.close()
@@ -82,14 +101,12 @@ class ParseZeekLogs(object):
             self.firstRun = False
         else:
             retVal = self.fd.readline().strip()
-
         # If an empty string is returned, readline is done reading
         if retVal == "" or retVal is None:
             raise StopIteration
 
         # Split out the data we are going to return
-        retVal = retVal.split(self.options.get('separator'))
-
+        retVal = retVal.split(self.seperator)
         record = None
         # Make sure we aren't dealing with a comment line
         if len(retVal) > 0 and not str(retVal[0]).strip().startswith("#") \
@@ -98,16 +115,16 @@ class ParseZeekLogs(object):
             # Prepare fields for conversion
             for x in range(0, len(retVal)):
                 if self.safe_headers is True:
-                    converted_field_name = self.options.get("fields")[x].replace(".", "_")
+                    converted_field_name = self.fields[x].replace(".", "_")
                 else:
-                    converted_field_name = self.options.get("fields")[x]
+                    converted_field_name = self.fields[x]
                 if self.filtered_fields is None or converted_field_name in self.filtered_fields:
                     # Translate - to "" to fix a conversation error
                     if retVal[x] == "-":
                         retVal[x] = ""
                     # Save the record field if the field isn't filtered out
                     record[converted_field_name] = retVal[x]
-
+          
             # Convert values to the appropriate record type
             record = self.convert_values(record, self.ignore_keys, self.data_types)
 
@@ -183,55 +200,6 @@ class ParseZeekLogs(object):
                 if self.filtered_fields is None or v in self.filtered_fields:
                     field_names.append(v)
         return field_names
-
-    @staticmethod
-    def bulk_to_elasticsearch(es, bulk_queue):
-        try:
-            helpers.bulk(es, bulk_queue)
-            return True
-        except:
-            print(print_exc())
-            return False
-
-    @staticmethod
-    def batch_to_elk(filepath=None, batch_size=500, fields=None, elk_ip="127.0.0.1", index="zeeklogs", meta={},
-                     ignore_keys=[]):
-        # Create handle to ELK
-        es = Elasticsearch([elk_ip])
-
-        # Create a handle to the log data
-        dataHandle = ParseZeekLogs(filepath, fields=fields, output_format="json", meta=meta)
-
-        # Begin to process and output data
-        dataBatch = []
-        for record in dataHandle:
-            try:
-                record = loads(record)
-
-                if isinstance(record, dict):
-                    record["_index"] = index
-                    record["_type"] = index
-                    try:
-                        record['timestamp'] = datetime.utcfromtimestamp(float(record['ts'])).isoformat()
-                    except:
-                        pass
-
-                    dataBatch.append(record)
-
-                    if len(dataBatch) >= batch_size:
-                        # Batch the queue to ELK
-                        # print("Batching to elk: " + str(len(dataBatch)))
-                        dataHandle.bulk_to_elasticsearch(es, dataBatch)
-                        # Clear the data queue
-                        dataBatch = []
-            except:
-                pass
-
-        # Batch the final data to ELK
-        # print("Batching final data to elk: " + str(len(dataBatch)))
-        dataHandle.bulk_to_elasticsearch(es, dataBatch)
-        # Clear the data queue
-        dataBatch = []
 
     def __str__(self):
         return dumps(self.data)

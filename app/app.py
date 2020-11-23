@@ -14,7 +14,7 @@ import dash_bootstrap_components as dbc
 import plotly.graph_objs as go
 
 import app.plot_helper as ph
-import app.data_prep_helper as dh
+#import app.data_prep_helper as dh
 
 from dash.dependencies import Input, Output, State
 from plotly import tools
@@ -23,32 +23,6 @@ from plotly import tools
 # set base app directory path
 APP_PATH = pathlib.Path(__file__).parent.resolve()
 
-# prepare the DataSet with all Input Time Series
-do_big = dh.ModelData(chart_col=["Price", "High", "Low", "Price_norm"])
-
-# smaller subset of columns for some visualisation use cases
-small_col_set = ['bitcoin_Price', 'sp500_Price', 'dax_Price', 'googl_Price',
-                 'gold_Price', 'alibaba_Price', 'amazon_Price', 'bitcoin_Google_Trends',
-                 'cryptocurrency_Google_Trends', 'trading_Google_Trends',
-                 'bitcoin_pos_sents', 'bitcoin_neg_sents', 'bitcoin_quot_sents',
-                 'economy_pos_sents', 'economy_neg_sents', 'economy_quot_sents']
-
-# columns for drop dowwn
-BASE_COLUMNS = list(do_big.chart_df[small_col_set])
-
-column_small_labels = []
-for col in BASE_COLUMNS:
-    column_small_labels.append({"label": col,
-                                "value": col,
-                                })
-
-# dates for prediction range
-FORE_DAYS = do_big.get_forecast_dates()
-
-fore_days_labels = []
-for day in FORE_DAYS:
-    fore_days_labels.append({"label": day,
-                             "value": day})
 
 
 # Lists for Project Menu    
@@ -68,8 +42,6 @@ svg_icon_src = ["https://raw.githubusercontent.com/herrfeder/herrfeder.github.io
 
  
 VIEW_DATA_FIG =  ph.get_data_table_2("", fig="", title="")
-
-
 
 
 ### Assistance Functions for creating HTML content ###
@@ -176,19 +148,19 @@ NAVBAR = dbc.Navbar(
                     dbc.Col(html.A(html.Img(src="https://upload.wikimedia.org/wikipedia/commons/2/21/BWI_GmbH_logo.svg", height="40px"), href="https://www.udacity.com"), width=1),
                     dbc.Col(dbc.NavbarBrand(dbc.Row([html.P("BWI Datalytics Hackathon 2020 ►", style={"color":"#ff0000"}),
                                                      html.P("BroAI", style={"color":"orange"}),
-                                                     html.P("%20(KI - Cyber Security)", style={"color":"grey"})], align="center")), width=9),
+                                                     html.P("(KI - Cyber Security)", style={"color":"grey"})], align="center")), width=9),
                                                      
                     dbc.Col(dbc.DropdownMenu(
                         children=[
-                            dbc.DropdownMenuItem("LinkedIn",
-                                        href="https://www.linkedin.com/in/davidlassig/"),
-                            dbc.DropdownMenuItem("Github Repo", 
-                                        href="https://github.com/herrfeder/Udacity-Data-Scientist-Capstone-Multivariate-Timeseries-Prediction-Webapp.git"),
+                            dbc.DropdownMenuItem("blubb",
+                                        href="blubb"),
+                            dbc.DropdownMenuItem("blubb", 
+                                        href="blubb"),
                           
                         ],
                         nav=False,
                         in_navbar=True,
-                        label="by David Lassig",
+                        label="by Team NastyNULL",
                         style={"color": "white", "font-size": 10, "font-weight":"lighter"},
                     ), width=2),
                     
@@ -241,8 +213,6 @@ EXP_CHART_PLOT = [dbc.CardHeader(html.H5("BRO List")),
                         html.Div(dcc.Loading(VIEW_DATA_FIG,id="data_table"))
                         ]))
                  ]
-
-VIEW_CONCLUSIONS = html.Div(dcc.Markdown(conclusion_texts.view_data_conclusion), id="resources")
 
 
 # CRAWLIN N TRAIN

@@ -23,8 +23,8 @@ from plotly import tools
 APP_PATH = pathlib.Path(__file__).parent.resolve()
 
 
-dh = dh.IDSData()
-dh.read_conn_source()
+#dh = dh.IDSData()
+#dh.read_source()
 
 
 

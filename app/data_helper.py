@@ -4,9 +4,17 @@ import os
 import sys
 import numpy as np
 import pickle
-from utilities import zeeklogreader
-from utilities import zeekheader
+try:
+    from app.utilities import zeeklogreader
+except:
+    from utilities import zeeklogreader
+try:
+    from app.utilities import zeekheader
+except:
+    from utilities import zeekheader
 import pathlib
+import datetime
+from ipdb import set_trace
 
 
 
@@ -30,9 +38,12 @@ class IDSData():
 
         self.df_cache_path = os.path.join(self.base_path,"utilities/df_cache")
                 
-        self.df_d = {"conn":pd.DataFrame()}
+        self.df_d = {"conn":pd.DataFrame(),
+                     "temp":""}
+
+        # dirty dirty dirty, hardcoded time offset, beginning of log file
         self.conn_timestamp = "2020-11-21-18-54-32"
-        #self.read_all_data_sources()
+
 
     def parse_json_to_pandas(self, file_type="",update=False):
         if not update:
@@ -59,18 +70,27 @@ class IDSData():
                 self.df_d[file_type] = self.read_pickle_to_pandas(file_type)
             else:
                 self.df_d[file_type] = self.parse_json_to_pandas(file_type)
-                self.save_pandas_to_pickle(file_type)
+
+            self.convert_zeek_df(file_type)
+            self.save_pandas_to_pickle(file_type)
 
 
     def update_source(self, file_type=""):
         if file_type in self.data_upd_f.keys():
             if not self.df_d[file_type].empty:
-                self.df_d[file_type] = self.df_d[file_type].append(self.parse_json_to_pandas(file_type,update=True), ignore_index=True)                
+                self.df_d["temp"] = self.parse_json_to_pandas(file_type,update=True)
+                self.convert_zeek_df("temp") 
+                self.df_d[file_type] = self.df_d[file_type].append(self.df_d["temp"], ignore_index=True)               
 
 
     def convert_zeek_df(self, file_type=""):
-        if file_type in self.data_read_f.keys():
-            
+        self.convert_epoch_ts(file_type)
+
+
+    def convert_epoch_ts(self, file_type=""):
+        epoch = datetime.datetime.strptime('1970-01-01 00:00:00', '%Y-%m-%d %H:%M:%S')
+        conn_offset= datetime.datetime.strptime(self.conn_timestamp, '%Y-%m-%d-%H-%M-%S')
+        self.df_d[file_type]["ts"] = pd.to_datetime(pd.to_datetime(round(self.df_d[file_type]["ts"] / 1000),unit="s")-epoch+conn_offset)            
 
 
     def read_all_data_sources(self):

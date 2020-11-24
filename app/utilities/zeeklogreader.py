@@ -1,10 +1,15 @@
-from utilities.parsezeeklogs import ParseZeekLogs
+try:
+    from app.utilities.parsezeeklogs import ParseZeekLogs
+except:
+    from utilities.parsezeeklogs import ParseZeekLogs
 from pygtail import Pygtail
 import pathlib
 import os
 from io import StringIO
-import utilities.zeekheader as zeekheader
-
+try:
+    import app.utilities.zeekheader as zeekheader
+except:
+    import utilities.zeekheader as zeekheader
 
 class ZeekLogReader():
 

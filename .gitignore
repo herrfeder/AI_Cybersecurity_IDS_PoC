@@ -130,6 +130,6 @@ dmypy.json
 
 
 # Individual Files
-utilities/logoffsets/*
-utilities/df_cache/*
+app/utilities/logoffsets/*
+app/utilities/df_cache/*
 

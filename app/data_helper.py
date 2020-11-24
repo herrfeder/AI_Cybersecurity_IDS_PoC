@@ -88,14 +88,24 @@ class IDSData():
 
 
     def convert_epoch_ts(self, file_type=""):
-        epoch = datetime.datetime.strptime('1970-01-01 00:00:00', '%Y-%m-%d %H:%M:%S')
-        conn_offset= datetime.datetime.strptime(self.conn_timestamp, '%Y-%m-%d-%H-%M-%S')
-        self.df_d[file_type]["ts"] = pd.to_datetime(pd.to_datetime(round(self.df_d[file_type]["ts"] / 1000),unit="s")-epoch+conn_offset)            
+        if not isinstance(self.df_d[file_type]["ts"][0],pd.Timestamp):
+            epoch = datetime.datetime.strptime('1970-01-01 00:00:00', '%Y-%m-%d %H:%M:%S')
+            conn_offset= datetime.datetime.strptime(self.conn_timestamp, '%Y-%m-%d-%H-%M-%S')
+            self.df_d[file_type]["ts"] = pd.to_datetime(pd.to_datetime(round(self.df_d[file_type]["ts"] / 1000),unit="s")-epoch+conn_offset)            
 
 
     def read_all_data_sources(self):
         for key in self.data_f:
             self.df_d[key] = self.parse_json_to_pandas(key)
+
+
+
+    def get_ten_most_source_ip(self, time_offset=""):
+        if time_offset:
+            pass
+        else:
+            return self.df_d["conn"]["id.orig_h"].value_counts()[1:11].to_dict()
+
 
 
 

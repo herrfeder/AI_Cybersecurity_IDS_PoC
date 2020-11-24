@@ -62,6 +62,7 @@ class ZeekLogReader():
                 if log_record is not None:
                     yield log_record
 
+
     def read_conn_logs(self, init_offset=""):
         output_json = []
         if not init_offset:

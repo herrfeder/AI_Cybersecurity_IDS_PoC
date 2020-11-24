@@ -23,9 +23,9 @@ from plotly import tools
 APP_PATH = pathlib.Path(__file__).parent.resolve()
 
 
-#dh = dh.IDSData()
-#dh.read_source()
-
+dh = dh.IDSData()
+dh.read_source("conn")
+dh.update_source("conn")
 
 
 
@@ -42,10 +42,7 @@ svg_icon_src = ["https://raw.githubusercontent.com/herrfeder/herrfeder.github.io
                 "https://raw.githubusercontent.com/herrfeder/herrfeder.github.io/master/cloud-computing.svg"]
 
 
-### Prepared Visualisations for speeding up web app ###
 
- 
-VIEW_DATA_FIG =  ph.get_data_table_2("", fig="", title="")
 
 
 ### Assistance Functions for creating HTML content ###
@@ -95,7 +92,7 @@ def make_items(acc_str_list, svg_icon_src):
                     id=f"row-{acc_str}",
                     style={"display":"inline-flex", 
                                 "align-items":"center",
-                                "padding-left":20,
+                                "padding-left":5,
                                 "padding-right":20} 
                     )
                 ], className="menucard", 
@@ -173,16 +170,53 @@ BODY = dbc.Container([
             ], fluid=True)
 
 
+### Prepared Visualisations for speeding up web app ###
+
+def return_ip_bar_chart(timespan=""):
+    data_dict = dh.get_ten_most_source_ip(timespan)
+    
+    return ph.plot_ten_most_ip(data_dict, title="",dash=True)
+    
+
+ 
+VIEW_ZEEK_TABLE =  ph.get_data_table_2(dh.df_d["conn"].tail(50), fig="", title="")
+WORLD_MAP = ""
+
+
+timespan_options = ["15min","30min","1h","5h","12h","24h"]
+
+timespan_list = []
+for num, option in enumerate(timespan_options):
+    timespan_list.append({"label": option,
+                          "value": num})
+
+
+MONITOR_TIME_DROPDOWN = html.Div([
+                        dcc.Dropdown(id='time_dropdown',
+                                     options=timespan_list,
+                                     value=1)
+
+                     ,], style={"width":"100%"})
+
+MONITOR_TIME_LABEL = html.Label("Timespan:",
+                         style={"padding-left":5,
+                                "padding": 10}) 
+
 ### MENU BASED CONTENT ###
 
 # STATIC ANALYSIS
 
 # MONITOR TRAFFIC
 
-EXP_CHART_PLOT = [dbc.CardHeader(html.H5("BRO List")),
-                  dbc.CardBody(html.Div(children=[ 
-                        html.Div(dcc.Loading(VIEW_DATA_FIG,id="data_table"))
-                        ]))
+EXP_CHART_PLOT = [dbc.Row(children=[
+                    dbc.Col([dbc.CardHeader(html.H5("Controls")), dbc.CardBody([MONITOR_TIME_LABEL,MONITOR_TIME_DROPDOWN])], md=1),
+                    dbc.Col([dbc.CardHeader(html.H5("Most frequently Source IPs")), dbc.CardBody(dcc.Loading(dcc.Graph(figure=return_ip_bar_chart(), id="most_ip_plot")))]),
+                    dbc.Col([dbc.CardHeader(html.H5("Second Plot")),dbc.CardBody()])
+                 ]),
+                  dbc.Row(children=[
+                    dbc.Col([dbc.CardHeader(html.H5("BRO List")), dbc.CardBody(html.Div(children=[VIEW_ZEEK_TABLE], id="monitor_data_table"))])  
+                  ]),
+                  dcc.Interval(id='table_update', interval=1*5000, n_intervals=0)
                  ]
 
 
@@ -211,6 +245,15 @@ server = app.server
 
 ### CALLBACKS ###
 
+@app.callback([Output('monitor_data_table', 'children'),
+               Output('most_ip_plot', 'figure')],
+              [Input('table_update', 'n_intervals')])
+def update_table_data(n_intervals):
+    dh.update_source("conn")
+    return ph.get_data_table_2(dh.df_d["conn"].tail(50), fig="", title=""), return_ip_bar_chart(timespan="")
+
+
+
 # Menu control function
 acc_input = [Input(f"menuitem-{i}", "n_clicks") for i in acc_str_list]
 @app.callback(
@@ -231,10 +274,10 @@ def show_plot(acc_01, acc_02, acc_03, acc_04, right_children):
         element_id = ctx.triggered[0]["prop_id"].split(".")[0]
 
     if (acc_str_list[0] in element_id):
-        return EXP_CHART_PLOT
+        return ""
         
     elif (acc_str_list[1] in element_id):
-        return ""
+        return EXP_CHART_PLOT
         
     elif (acc_str_list[2] in element_id):
         return ""

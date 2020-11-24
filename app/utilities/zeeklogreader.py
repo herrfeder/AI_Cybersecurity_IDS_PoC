@@ -1,9 +1,9 @@
-from utilities.parsezeeklogs import ParseZeekLogs
+from app.utilities.parsezeeklogs import ParseZeekLogs
 from pygtail import Pygtail
 import pathlib
 import os
 from io import StringIO
-import utilities.zeekheader as zeekheader
+import app.utilities.zeekheader as zeekheader
 
 
 class ZeekLogReader():

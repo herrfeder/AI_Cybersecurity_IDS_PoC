@@ -19,6 +19,9 @@ from dash.dependencies import Input, Output, State
 from plotly import tools
 
 
+global monitor_time_interval
+monitor_time_interval = 60
+
 # set base app directory path
 APP_PATH = pathlib.Path(__file__).parent.resolve()
 
@@ -113,10 +116,10 @@ NAVBAR = dbc.Navbar(
        
             dbc.Row(
                 [
-                    dbc.Col(html.A(html.Img(src="https://upload.wikimedia.org/wikipedia/commons/2/21/BWI_GmbH_logo.svg", height="40px"), href="https://www.udacity.com"), width=1),
-                    dbc.Col(dbc.NavbarBrand(dbc.Row([html.P("BWI Datalytics Hackathon 2020 ►", style={"color":"#ff0000"}),
-                                                     html.P("BroAI", style={"color":"orange"}),
-                                                     html.P("(KI - Cyber Security)", style={"color":"grey"})], align="center")), width=9),
+                    dbc.Col(html.A(html.Img(src="https://abload.de/img/bwi_dataanalyticshack7ujy4.png", height="40px"), href="https://www.bwi.de"), width=2),
+                    dbc.Col(dbc.NavbarBrand(dbc.Row([
+                                                     html.P("BroAI", style={"color":"#FF0000"}),
+                                                     html.P("(KI - Cyber Security)", style={"color":"orange"})], align="center")), width=7),
                                                      
                     dbc.Col(dbc.DropdownMenu(
                         children=[
@@ -172,29 +175,41 @@ BODY = dbc.Container([
 
 ### Prepared Visualisations for speeding up web app ###
 
-def return_ip_bar_chart(timespan=""):
-    data_dict = dh.get_ten_most_source_ip(timespan)
+def return_ip_bar_chart(file_type="", timespan=""):
+    data_dict = dh.get_ten_most_source_ip(file_type, timespan)
     
     return ph.plot_ten_most_ip(data_dict, title="",dash=True)
-    
+
+
+def return_data_table(file_type="", timespan=""):
+    df = dh.get_timespan_df(file_type, timespan)
+
+    return ph.plot_data_table(df.tail(50), fig="", title="")
+
+
+def return_scatter(file_type="", timespan=""):
+    df = dh.get_timespan_df(file_type, timespan)
+
+    return ph.plot_monitor_scatter(df, title="", dash=True)
 
  
-VIEW_ZEEK_TABLE =  ph.get_data_table_2(dh.df_d["conn"].tail(50), fig="", title="")
-WORLD_MAP = ""
+WORLD_MAP = ph.get_world_plot(dash=True)
+MONITOR_SCATTER = ""
 
 
-timespan_options = ["15min","30min","1h","5h","12h","24h"]
+timespan_labels = ["15min","30min","1h","5h","12h","24h"]
+timespan_values = [15, 30, 60, 300, 720, 1440]
 
 timespan_list = []
-for num, option in enumerate(timespan_options):
-    timespan_list.append({"label": option,
-                          "value": num})
+for label, value in zip(timespan_labels, timespan_values):
+    timespan_list.append({"label": label,
+                          "value": value})
 
 
 MONITOR_TIME_DROPDOWN = html.Div([
-                        dcc.Dropdown(id='time_dropdown',
+                        dcc.Dropdown(id='monitor_time_dropdown',
                                      options=timespan_list,
-                                     value=1)
+                                     value=60)
 
                      ,], style={"width":"100%"})
 
@@ -210,13 +225,19 @@ MONITOR_TIME_LABEL = html.Label("Timespan:",
 
 EXP_CHART_PLOT = [dbc.Row(children=[
                     dbc.Col([dbc.CardHeader(html.H5("Controls")), dbc.CardBody([MONITOR_TIME_LABEL,MONITOR_TIME_DROPDOWN])], md=1),
-                    dbc.Col([dbc.CardHeader(html.H5("Most frequently Source IPs")), dbc.CardBody(dcc.Loading(dcc.Graph(figure=return_ip_bar_chart(), id="most_ip_plot")))]),
-                    dbc.Col([dbc.CardHeader(html.H5("Second Plot")),dbc.CardBody()])
+                    dbc.Col([dbc.CardHeader(html.H5("Most frequently Source IPs")), 
+                             dbc.CardBody(dcc.Loading(dcc.Graph(figure="", id="most_ip_plot"),color="#FF0000"))
+                    ]),
+                    dbc.Col([dbc.CardHeader(html.H5("Location of Source IPs")),
+                             dbc.CardBody(dcc.Loading(dcc.Graph(figure=WORLD_MAP, id="world_map_plot"),color="#FF0000"))])
                  ]),
+                  
                   dbc.Row(children=[
-                    dbc.Col([dbc.CardHeader(html.H5("BRO List")), dbc.CardBody(html.Div(children=[VIEW_ZEEK_TABLE], id="monitor_data_table"))])  
+                    dbc.Col([dbc.CardHeader(html.H5("Connection List")), dbc.CardBody(html.Div(children=[], id="monitor_data_table"))]),
+                    dbc.Col([dbc.CardHeader(html.H5("Connection over Time")), 
+                             dbc.CardBody(dcc.Loading(dcc.Graph(figure="", id="monitor_scatter_plot"), color="#FF0000"))])    
                   ]),
-                  dcc.Interval(id='table_update', interval=1*5000, n_intervals=0)
+                  dcc.Interval(id='table_update', interval=1*10000, n_intervals=0)
                  ]
 
 
@@ -245,13 +266,18 @@ server = app.server
 
 ### CALLBACKS ###
 
-@app.callback([Output('monitor_data_table', 'children'),
-               Output('most_ip_plot', 'figure')],
-              [Input('table_update', 'n_intervals')])
-def update_table_data(n_intervals):
-    dh.update_source("conn")
-    return ph.get_data_table_2(dh.df_d["conn"].tail(50), fig="", title=""), return_ip_bar_chart(timespan="")
 
+
+@app.callback([Output('monitor_data_table', 'children'),
+               Output('most_ip_plot', 'figure'),
+               Output('monitor_scatter_plot', 'figure')],
+               [Input('table_update', 'n_intervals'),
+                Input('monitor_time_dropdown', 'value')])
+def update_table_data(n_intervals, monitor_time_interval):
+    dh.update_source("conn")
+    return (return_data_table("conn", timespan=monitor_time_interval), 
+           return_ip_bar_chart("conn", timespan=monitor_time_interval),
+           return_scatter("conn", timespan=monitor_time_interval))
 
 
 # Menu control function

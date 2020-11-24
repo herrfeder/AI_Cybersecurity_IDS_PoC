@@ -70,9 +70,10 @@ class IDSData():
                 self.df_d[file_type] = self.read_pickle_to_pandas(file_type)
             else:
                 self.df_d[file_type] = self.parse_json_to_pandas(file_type)
+                self.convert_zeek_df(file_type)
+                self.save_pandas_to_pickle(file_type)
 
-            self.convert_zeek_df(file_type)
-            self.save_pandas_to_pickle(file_type)
+
 
 
     def update_source(self, file_type=""):
@@ -80,31 +81,48 @@ class IDSData():
             if not self.df_d[file_type].empty:
                 self.df_d["temp"] = self.parse_json_to_pandas(file_type,update=True)
                 self.convert_zeek_df("temp") 
-                self.df_d[file_type] = self.df_d[file_type].append(self.df_d["temp"], ignore_index=True)               
+                self.df_d[file_type] = self.df_d[file_type].append(self.df_d["temp"])               
 
 
     def convert_zeek_df(self, file_type=""):
         self.convert_epoch_ts(file_type)
+        self.sort_set_index(file_type)
+        self.drop_unused_conn_fields(file_type)
+        self.fill_nan_values(file_type)
 
 
     def convert_epoch_ts(self, file_type=""):
         if not isinstance(self.df_d[file_type]["ts"][0],pd.Timestamp):
             epoch = datetime.datetime.strptime('1970-01-01 00:00:00', '%Y-%m-%d %H:%M:%S')
             conn_offset= datetime.datetime.strptime(self.conn_timestamp, '%Y-%m-%d-%H-%M-%S')
-            self.df_d[file_type]["ts"] = pd.to_datetime(pd.to_datetime(round(self.df_d[file_type]["ts"] / 1000),unit="s")-epoch+conn_offset)            
+            self.df_d[file_type]["ts"] = pd.to_datetime(round(self.df_d[file_type]["ts"]),unit="s") + pd.DateOffset(hours=1)    
 
 
-    def read_all_data_sources(self):
-        for key in self.data_f:
-            self.df_d[key] = self.parse_json_to_pandas(key)
+    def sort_set_index(self, file_type=""):
+        self.df_d[file_type] = self.df_d[file_type].sort_values("ts").set_index("ts") 
 
 
+    def drop_unused_conn_fields(self, file_type):
+        self.df_d[file_type].drop("uid", errors="ignore", inplace=True)
+        self.df_d[file_type].drop("tunnel_parents", errors="ignore", inplace=True)
+        self.df_d[file_type].drop("local_orig", errors="ignore", inplace=True)
+        self.df_d[file_type].drop("local_resp", errors="ignore", inplace=True)
 
-    def get_ten_most_source_ip(self, time_offset=""):
-        if time_offset:
-            pass
-        else:
-            return self.df_d["conn"]["id.orig_h"].value_counts()[1:11].to_dict()
+    
+    def fill_nan_values(self, file_type=""):
+        self.df_d[file_type].fillna("",inplace=True)
+ 
+
+
+    def get_timespan_df(self, file_type, time_offset):
+        time_delta = self.df_d[file_type].index.max() - datetime.timedelta(minutes=time_offset)
+
+        return self.df_d[file_type][self.df_d[file_type].index > time_delta]
+
+
+    def get_ten_most_source_ip(self, file_type, time_offset):
+        df = self.get_timespan_df(file_type, time_offset)
+        return df["id.orig_h"].value_counts()[1:11].to_dict()
 
 
 

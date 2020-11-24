@@ -12,9 +12,8 @@ import dash_core_components as dcc
 import dash_html_components as html
 import dash_bootstrap_components as dbc
 import plotly.graph_objs as go
-
 import app.plot_helper as ph
-#import app.data_prep_helper as dh
+import app.data_helper as dh
 
 from dash.dependencies import Input, Output, State
 from plotly import tools
@@ -22,6 +21,11 @@ from plotly import tools
 
 # set base app directory path
 APP_PATH = pathlib.Path(__file__).parent.resolve()
+
+
+dh = dh.IDSData()
+dh.read_conn_source()
+
 
 
 
@@ -102,10 +106,6 @@ def make_items(acc_str_list, svg_icon_src):
          
     return card_list
 
-
-
-
-                    
                     
 ### BASIC WEB APP LAYOUT ###
 
@@ -267,13 +267,9 @@ def toggle_active_dot(n1, n2, n3, n4,
 
     if not ctx.triggered:
         return sty_na, sty_na, sty_na, sty_na
-        print("not_triggered")
     else:
         button_id = ctx.triggered[0]["prop_id"].split(".")[0]
-        print(button_id)
-
     if (acc_str_list[0] in button_id):
-        print("button 1 pressed")
         return sty_a, sty_na, sty_na, sty_na
     elif (acc_str_list[1] in button_id):
         return sty_na, sty_a, sty_na, sty_na

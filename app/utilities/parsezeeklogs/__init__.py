@@ -34,7 +34,6 @@ class ParseZeekLogs(object):
 
         # Read the header option lines
         l = self.fd.readline().strip()
-        print(l)
         if l.strip().startswith("#"):
             while l.strip().startswith("#"):
                 # Parse the options out
@@ -59,10 +58,7 @@ class ParseZeekLogs(object):
             self.set_seperator = self.options.get('set_seperator')
             self.empty_field = self.options.get('empty_field')
             self.unset_field = self.options.get('unset_field')
-            print("in if")
-            print(self.fields)
         else:
-            print("in else")
             self.fields = fields
             self.types = types
             self.seperator = seperator
@@ -71,7 +67,6 @@ class ParseZeekLogs(object):
             self.unset_field = unset_field
             
             self.firstLine = l
-        print(self.fields)
 
 
         # Convert field names if safe_headers is enabled

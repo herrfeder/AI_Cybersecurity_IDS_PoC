@@ -4,8 +4,14 @@ import os
 import sys
 import numpy as np
 import pickle
-from app.utilities import zeeklogreader
-from app.utilities import zeekheader
+try:
+    from app.utilities import zeeklogreader
+except:
+    from utilities import zeeklogreader
+try:
+    from app.utilities import zeekheader
+except:
+    from utilities import zeekheader
 import pathlib
 import datetime
 from ipdb import set_trace

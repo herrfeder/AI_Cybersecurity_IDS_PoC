@@ -15,6 +15,7 @@ except:
 import pathlib
 import datetime
 from ipdb import set_trace
+import ipinfo
 
 
 
@@ -40,6 +41,13 @@ class IDSData():
                 
         self.df_d = {"conn":pd.DataFrame(),
                      "temp":""}
+
+        self.latlon_cache_path = os.path.join(self.df_cache_path, "latlon.p")
+
+        if os.path.exists(self.latlon_cache_path):
+            self.latlon_cache = pickle.load( open( self.latlon_cache_path, "rb" ) )
+        else:
+            self.latlon_cache = {}
 
         # dirty dirty dirty, hardcoded time offset, beginning of log file
         self.conn_timestamp = "2020-11-21-18-54-32"
@@ -120,11 +128,43 @@ class IDSData():
         return self.df_d[file_type][self.df_d[file_type].index > time_delta]
 
 
+    def get_lonlat_from_ip(self, ip):
+        if (lonlat_t := self.latlon_cache.get(ip)):
+            return lonlat_t
+        else:
+            handler = ipinfo.getHandler()
+            details = handler.getDetails(ip)
+
+            lon = details.longitude.strip("_")
+            lat = details.latitude.strip("_")
+
+            self.latlon_cache[ip] = (lon, lat)
+
+            return (lon,lat)
+
+  
     def get_ten_most_source_ip(self, file_type, time_offset):
         df = self.get_timespan_df(file_type, time_offset)
-        return df["id.orig_h"].value_counts()[1:11].to_dict()
+        dict_ip = df["id.orig_h"].value_counts()[1:11].to_dict()
+
+        ips=list(dict_ip.keys())[::-1]
+        number=list(dict_ip.values())[::-1]
+
+        return {"ips": ips, "number": number}
 
 
+    def get_longitude_latitude(self, file_type, time_offset):
+        ip_dict = self.get_ten_most_source_ip(file_type, time_offset)
+        ips=ip_dict["ips"]
+        lon_lat_list = []
 
+        for ip in ips:
+            lon_lat_list.append(self.get_lonlat_from_ip(ip))
+
+        pickle.dump( self.latlon_cache, open( self.latlon_cache_path, "wb" ) )
+
+        ip_dict["lonlat"] = lon_lat_list
+
+        return ip_dict
 
  

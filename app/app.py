@@ -27,6 +27,7 @@ monitor_time_interval = 60
 APP_PATH = pathlib.Path(__file__).parent.resolve()
 
 
+
 dh = dh.IDSData()
 dh.read_source("conn")
 dh.update_source("conn")
@@ -34,13 +35,13 @@ dh.update_source("conn")
 
 
 # Lists for Project Menu    
-acc_str_list = ["STATIC ANALYSIS",
+acc_str_list = ["CONCEPT",
                 "MONITOR TRAFFIC",
                 "CRAWL N TRAIN", 
                 "APPLY MODEL"
                 ]
 
-svg_icon_src = ["https://raw.githubusercontent.com/herrfeder/herrfeder.github.io/master/daten-kreisdiagramm.svg",
+svg_icon_src = ["https://raw.githubusercontent.com/herrfeder/herrfeder.github.io/master/71438.svg",
                 "https://raw.githubusercontent.com/herrfeder/herrfeder.github.io/master/monitor.svg",
                 "https://raw.githubusercontent.com/herrfeder/herrfeder.github.io/master/164053.svg",
                 "https://raw.githubusercontent.com/herrfeder/herrfeder.github.io/master/cloud-computing.svg"]
@@ -174,7 +175,7 @@ BODY = dbc.Container([
             ], fluid=True)
 
 
-### Prepared Visualisations for speeding up web app ###
+### Functions where Plothelper and Datahelper comes together ###
 
 def return_ip_bar_chart(file_type="", timespan=""):
     data_dict = dh.get_ten_most_source_ip(file_type, timespan)
@@ -193,10 +194,17 @@ def return_scatter(file_type="", timespan=""):
 
     return ph.plot_monitor_scatter(df, title="", dash=True)
 
+
 def return_world(file_type="", timespan=""):
     data_dict = dh.get_longitude_latitude(file_type, timespan)
     print(data_dict)
     return ph.get_world_plot(data_dict, dash=True)
+
+
+def return_apply_table(file_type=""):
+    df = dh.get_timespan_df(file_type, 15)
+
+    return ph.plot_prediction_table(df.tail(15), fig="", title="")
 
  
 WORLD_MAP = ""
@@ -223,13 +231,27 @@ MONITOR_TIME_LABEL = html.Label("Timespan:",
                          style={"padding-left":5,
                                 "padding": 10}) 
 
+
+ANOMALY_DROPDOWN = html.Div([
+                        dcc.Dropdown(id='anomaly_dropdown',
+                                     options=timespan_list,
+                                     value=60)
+
+                     ,], style={"width":"100%"})
+
+ANOMALY_LABEL = html.Label("Choose Anomaly Model:",
+                         style={"padding-left":5,
+                                "padding": 10}) 
+
 ### MENU BASED CONTENT ###
 
-# STATIC ANALYSIS
+# CONCEPT
+
+CONCEPT = ""
 
 # MONITOR TRAFFIC
 
-EXP_CHART_PLOT = [dbc.Row(children=[
+MONITOR_FRONTEND = [dbc.Row(children=[
                     dbc.Col([dbc.CardHeader(html.H5("Controls")), dbc.CardBody([MONITOR_TIME_LABEL,MONITOR_TIME_DROPDOWN])], md=1),
                     dbc.Col([dbc.CardHeader(html.H5("Most frequently Source IPs")), 
                              dbc.CardBody(dcc.Loading(dcc.Graph(figure="", id="most_ip_plot"),color="#FF0000"))
@@ -237,20 +259,30 @@ EXP_CHART_PLOT = [dbc.Row(children=[
                     dbc.Col([dbc.CardHeader(html.H5("Location of Source IPs")),
                              dbc.CardBody(dcc.Loading(dcc.Graph(figure="", id="world_map_plot"),color="#FF0000"))])
                  ]),
-                  
                   dbc.Row(children=[
                     dbc.Col([dbc.CardHeader(html.H5("Connection List")), dbc.CardBody(html.Div(children=[], id="monitor_data_table"))]),
                     dbc.Col([dbc.CardHeader(html.H5("Connection over Time")), 
                              dbc.CardBody(dcc.Loading(dcc.Graph(figure="", id="monitor_scatter_plot"), color="#FF0000"))])    
                   ]),
-                  dcc.Interval(id='table_update', interval=1*10000, n_intervals=0)
+                    dcc.Interval(id='table_update', interval=1*10000, n_intervals=0)
                  ]
 
 
 # CRAWLIN N TRAIN
 
+TRAINING = ""
+
 # APPLY MODEL
 
+APPLY_FRONTEND = [dbc.Row(children=[
+                    dbc.CardHeader(dbc.CardBody([ANOMALY_LABEL, ANOMALY_DROPDOWN]))
+                ]),
+                 dbc.Row(children=[
+                    dbc.Col([dbc.CardHeader(html.H5("Predict Attacks")), dbc.CardBody(html.Div(children=[], id="apply_data_table"))
+                    ]),
+                    ]),
+                    dcc.Interval(id='apply_update', interval=1*5000, n_intervals=0),
+                ]
 
 ### WEBAPP INIT ###
 
@@ -272,6 +304,13 @@ server = app.server
 
 ### CALLBACKS ###
 
+@app.callback([Output('apply_data_table', 'children')],
+               [Input('apply_update', 'n_intervals'),
+                Input('anomaly_dropdown', 'value')])
+def update_table_data(n_intervals, monitor_time_interval):
+    dh.update_source("conn")
+    return return_apply_table("conn"), 
+         
 
 
 @app.callback([Output('monitor_data_table', 'children'),
@@ -303,23 +342,23 @@ def show_plot(acc_01, acc_02, acc_03, acc_04, right_children):
     ctx = dash.callback_context
 
     if not ctx.triggered:
-        return ""
+        return CONCEPT
     else:
         element_id = ctx.triggered[0]["prop_id"].split(".")[0]
 
     if (acc_str_list[0] in element_id):
-        return ""
+        return CONCEPT
         
     elif (acc_str_list[1] in element_id):
-        return EXP_CHART_PLOT
+        return MONITOR_FRONTEND
         
     elif (acc_str_list[2] in element_id):
-        return ""
+        return TRAINING
         
     elif (acc_str_list[3] in element_id):
-        return ""
+        return APPLY_FRONTEND
     else:
-        return ""
+        return CONCEPT
         
     
 

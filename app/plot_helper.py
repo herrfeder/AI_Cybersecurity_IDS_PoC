@@ -55,25 +55,77 @@ def plot_ten_most_ip(data_dict, title="", dash=False):
         fig.show()
 
 
-def temp_style():
+def pred_rf_style(df):
 
-    df['Rating'] = df['Humidity'].apply(lambda x:
-    '⭐⭐⭐' if x > 30 else (
-    '⭐⭐' if x > 20 else (
-    '⭐' if x > 10 else ''   
-    )))
-    df['Growth'] = df['Temperature'].apply(lambda x: '↗️' if x > 0 else '↘️')
-    df['Status'] = df['Temperature'].apply(lambda x: '🔥' if x > 0 else '🚒')
-    app.layout = dash_table.DataTable(
-    data=df.to_dict('records'),
-    columns=[
-        {"name": i, "id": i} for i in df.columns
-    ],)
+    df['Status_RF'] = df['Prediction_rf'].apply(lambda x:
+    '😎' if x < 0.6 else (
+    '😨' if x < 0.9 else '😱' 
+    ))
+
+    return df
+ 
+
+
+def plot_prediction_table(df, fig="", title=""):
+
+    df = pred_rf_style(df)
+
+    plot_df = df[["Status_RF", "Time", "id.orig_h", "id.orig_p", 
+                  "id.resp_h","id.resp_p","proto",
+                  "Prediction_rf"]]
+
+    dt = dash_table.DataTable(
+        id='datatable-row-ids',
+        columns=[
+            {'name': i, 'id': i, 'deletable': True} for i in plot_df.columns
+            # omit the id column
+            if i != 'id'
+            ],
+        data=plot_df.to_dict('records'),
+        editable=False,
+        sort_action="native",
+        sort_mode='multi',
+        row_selectable='multi',
+        row_deletable=False,
+        selected_rows=[],
+        page_action='native',
+        page_current= 0,
+        page_size= 30,
+        style_as_list_view=True,
+        style_data_conditional=[
+            {
+                'if': {'column_id': 'Status_RF'},
+                'fontSize': '2rem',
+            },
+            {
+                'if': {'row_index': 'odd'},
+                'backgroundColor': 'rgb(50, 50, 50)'
+            },
+            {
+                'if': {'row_index': 'even'},
+                'backgroundColor': 'rgb(50, 60, 50)'
+            },
+
+        ],
+        style_header={
+            'backgroundColor': 'rgb(140, 0, 0)',
+            'fontWeight': 'bold'
+            },
+        style_cell={ 'border': '10px solid #222', 'height': '50px' },
+        style_table= {'height': '1000px', 'width': '2000px',
+                      'overflowY': 'auto',
+                      'overflowX': 'auto'
+                     }
+    )
+
+    
+   
+    return dt
 
 
 def plot_data_table(df, fig="", title=""):
 
-    plot_df = df[["id.orig_h", "id.orig_p", 
+    plot_df = df[["Time", "id.orig_h", "id.orig_p", 
                   "id.resp_h","id.resp_p","proto",
                   "service", "orig_ip_bytes","resp_ip_bytes",
                   "duration","orig_bytes", "resp_bytes"]]
@@ -86,16 +138,15 @@ def plot_data_table(df, fig="", title=""):
             if i != 'id'
             ],
         data=plot_df.to_dict('records'),
-        editable=True,
-        filter_action="native",
+        editable=False,
         sort_action="native",
         sort_mode='multi',
         row_selectable='multi',
-        row_deletable=True,
+        row_deletable=False,
         selected_rows=[],
         page_action='native',
         page_current= 0,
-        page_size= 100,
+        page_size= 50,
         style_as_list_view=True,
         style_data_conditional=[
             {

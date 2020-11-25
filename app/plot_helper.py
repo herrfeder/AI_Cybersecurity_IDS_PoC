@@ -7,7 +7,8 @@ import numpy as np
 import dash_table
 from ipdb import set_trace
 
-import numpy as np           
+import numpy as np      
+import plotly.express as px     
 
 
 
@@ -44,9 +45,8 @@ def apply_layout(fig, title="", height=1250, width=600):
 
 def plot_ten_most_ip(data_dict, title="", dash=False):
 
-    ips=list(data_dict.keys())[::-1]
-    number=list(data_dict.values())[::-1]
-
+    ips = data_dict["ips"]
+    number = data_dict["number"]
     fig = go.Figure([go.Bar(x=number, y=ips, orientation='h', marker_color="#ff0000", width=0.5)])
 
     if dash:
@@ -129,6 +129,7 @@ def plot_monitor_scatter(df, fig="", title="", dash=False):
 
     resp_pkts = df.groupby(pd.Grouper(freq='1Min', base=30, label='right'))["resp_pkts"].sum()
     orig_pkts = df.groupby(pd.Grouper(freq='1Min', base=30, label='right'))["orig_pkts"].sum()
+    new_index = df.groupby(pd.Grouper(freq='1Min', base=30, label='right'))["orig_pkts"].sum().index
 
     if not fig:
         fig = make_subplots(
@@ -136,50 +137,40 @@ def plot_monitor_scatter(df, fig="", title="", dash=False):
                         cols=1, 
                         shared_xaxes=True)
      
-        fig.add_trace(go.Scatter(x=df.index, 
+        fig.add_trace(go.Scatter(x=new_index, 
                              y=resp_pkts,
                              line=dict(color='#2cfec1'),
                              name="Response Packets"), row=1, col=1)
 
-        fig.add_trace(go.Scatter(x=df.index, 
+        fig.add_trace(go.Scatter(x=new_index, 
                              y=orig_pkts,
                              line=dict(color='#2ac9fe'),
                              name="Origin Packets"), row=1, col=1)
 
     if dash:
-        return apply_layout(fig, title, height=400)
+        return apply_layout(fig, title, height=400, width=800)
     else:
         fig.show()
 
 
 
 
-def get_world_plot(df="", fig="", title="", dash=False):
+def get_world_plot(data_dict, fig="", title="", dash=False):
 
-    # Define the data to be visualised and some of the parameters of the visualisation
-    data = [ dict(
-            type = 'choropleth',
-            colorscale = 'Rainbow',
-            #locations = df['Code'],
-            #z = life_exp,
-            #text = df['Country'],
-            colorbar = dict(
-                title = 'Years', 
-                titlefont=dict(size=25),
-                tickfont=dict(size=18))
-        ) ]
-    # Define layout
-    layout = dict(
-        geo = dict(
-            showframe = True,
-            bgcolor="rgb(34,34,34)",
-            showcoastlines = True,
-            projection = dict(type = 'orthographic')
-            )
-        )
+    ips = data_dict["ips"]
+    number = data_dict["number"]
+    lonlat = data_dict["lonlat"]
 
-    fig = go.Figure(data,layout)
+    long_list = [i[0] for i in lonlat]
+    lat_list = [i[1] for i in lonlat]
+
+    fig = px.scatter_geo(lon=long_list, lat=lat_list,
+                     size=number,
+                     color =number,
+                     projection="orthographic")
     
+    fig.layout.geo["bgcolor"] = "rgb(34,34,34)"
+
     if dash:
         return apply_layout(fig, title, 400)
     else:

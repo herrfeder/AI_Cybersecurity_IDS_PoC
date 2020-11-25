@@ -15,6 +15,7 @@ import plotly.graph_objs as go
 import app.plot_helper as ph
 import app.data_helper as dh
 
+
 from dash.dependencies import Input, Output, State
 from plotly import tools
 
@@ -192,8 +193,13 @@ def return_scatter(file_type="", timespan=""):
 
     return ph.plot_monitor_scatter(df, title="", dash=True)
 
+def return_world(file_type="", timespan=""):
+    data_dict = dh.get_longitude_latitude(file_type, timespan)
+    print(data_dict)
+    return ph.get_world_plot(data_dict, dash=True)
+
  
-WORLD_MAP = ph.get_world_plot(dash=True)
+WORLD_MAP = ""
 MONITOR_SCATTER = ""
 
 
@@ -229,7 +235,7 @@ EXP_CHART_PLOT = [dbc.Row(children=[
                              dbc.CardBody(dcc.Loading(dcc.Graph(figure="", id="most_ip_plot"),color="#FF0000"))
                     ]),
                     dbc.Col([dbc.CardHeader(html.H5("Location of Source IPs")),
-                             dbc.CardBody(dcc.Loading(dcc.Graph(figure=WORLD_MAP, id="world_map_plot"),color="#FF0000"))])
+                             dbc.CardBody(dcc.Loading(dcc.Graph(figure="", id="world_map_plot"),color="#FF0000"))])
                  ]),
                   
                   dbc.Row(children=[
@@ -270,14 +276,16 @@ server = app.server
 
 @app.callback([Output('monitor_data_table', 'children'),
                Output('most_ip_plot', 'figure'),
-               Output('monitor_scatter_plot', 'figure')],
+               Output('monitor_scatter_plot', 'figure'),
+               Output('world_map_plot', 'figure')],
                [Input('table_update', 'n_intervals'),
                 Input('monitor_time_dropdown', 'value')])
 def update_table_data(n_intervals, monitor_time_interval):
     dh.update_source("conn")
     return (return_data_table("conn", timespan=monitor_time_interval), 
            return_ip_bar_chart("conn", timespan=monitor_time_interval),
-           return_scatter("conn", timespan=monitor_time_interval))
+           return_scatter("conn", timespan=monitor_time_interval),
+           return_world("conn", timespan=monitor_time_interval))
 
 
 # Menu control function

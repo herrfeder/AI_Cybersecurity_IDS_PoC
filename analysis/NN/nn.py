@@ -11,7 +11,7 @@ import numpy as np
 from numpy import asarray
 
 # load dataset
-data_to_predict = pd.read_pickle("davidsSet.pickle")
+data_to_predict = pd.read_pickle("../data/davidsSet.pickle")
 data_to_predict['duration'] = [0.0 if isinstance(x,str) else x for x in data_to_predict['duration']]
 #load Modell
 loaded = keras.models.load_model("model_AI4Sec")

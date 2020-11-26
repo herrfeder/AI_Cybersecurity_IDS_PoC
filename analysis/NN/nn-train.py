@@ -4,12 +4,14 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 from autokeras import StructuredDataClassifier
+import tensorflow as tf
 
 # load dataset
 #url = 'https://raw.githubusercontent.com/jbrownlee/Datasets/master/sonar.csv'
-dataframe = pd.read_pickle("../data/unsw-small.pickle")
-dataframe
-
+#dataframe = pd.read_pickle("../data/unsw-small.pickle")
+#dataframe
+dataframe = pd.read_csv("../data/unsw-small.csv")
+del dataframe["Unnamed: 0"]
 
 # split into input and output elements
 data = dataframe.values
@@ -24,7 +26,7 @@ print("shape of the splitting Data X_train, X_test, y_train, y_test")
 print(X_train.shape, X_test.shape, y_train.shape, y_test.shape)
 
 # define the search space
-search = StructuredDataClassifier(max_trials=15)
+search = StructuredDataClassifier(max_trials=30, tuner='random', metrics=[tf.keras.metrics.CategoricalAccuracy(),'accuracy'])
 
 # perform the search
 search.fit(x=X_train, y=y_train, verbose=1)

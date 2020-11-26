@@ -112,3 +112,14 @@ tr:hover {
 .navbar .navbar-default{
   background-image: url("https://raw.githubusercontent.com/herrfeder/herrfeder.github.io/master/image.png");
 }
+
+.image_big {
+    width: 600px;
+
+}
+
+.loading_anomaly {
+    width: 1000px;
+    height: 500px;
+    background-image: url("https://raw.githubusercontent.com/herrfeder/herrfeder.github.io/master/model_train.jpg") ;
+}

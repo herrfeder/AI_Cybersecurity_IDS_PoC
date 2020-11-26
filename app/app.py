@@ -263,7 +263,7 @@ MONITOR_TIME_DROPDOWN = html.Div([
                                      options=timespan_list,
                                      value=60)
 
-                     ,], style={"width":"100%"})
+                     ,], style={"width":"100%", "color": "black"})
 
 MONITOR_TIME_LABEL = html.Label("Timespan:",
                          style={"padding-left":5,
@@ -274,14 +274,14 @@ ANOMALY_COUNTER_DROPDOWN = html.Div([
                         dcc.Dropdown(id='anomaly_counter_dropdown',
                                      options=anomaly_counter_list,
                                      value=5*60)
-                                     ,], style={"width":"100%"})
+                                     ,], style={"width":"100%", "color": "black"})
 
 
 ANOMALY_SPAN_DROPDOWN = html.Div([
                         dcc.Dropdown(id='anomaly_span_dropdown',
                                      options=anomaly_span_list,
                                      value=72)
-                        ,], style={"width":"100%"})
+                        ,], style={"width":"100%", "color": "black"})
 
 ANOMALY_LABEL = html.Label("Choose Anomaly Model:",
                          style={"padding-left":5,
@@ -318,15 +318,31 @@ MONITOR_FRONTEND = [dbc.Row(children=[
 
 # CRAWLIN N TRAIN
 
-tab1_content = dbc.Card(
-    dbc.CardBody(
-        [
-            html.P("Random Forest & Neural Net", className="card-text"),
-            
-        ]
-    ),
-    className="mt-6", style={"padding-top":"20px"}
-)
+roccurve = """
+![](https://raw.githubusercontent.com/herrfeder/herrfeder.github.io/master/Selection_006.png)
+"""
+
+roccurve_zoom = """
+![](https://raw.githubusercontent.com/herrfeder/herrfeder.github.io/master/Selection_007.png)
+"""
+
+nn_confusion = """
+![](https://raw.githubusercontent.com/herrfeder/herrfeder.github.io/master/nn_confusion_matrix_v1.png)
+"""
+
+rf_confusion = """
+![](https://raw.githubusercontent.com/herrfeder/herrfeder.github.io/master/random_forest_confusion_matrix_v2.png)
+"""
+
+
+
+tab1_content = [dbc.Row(children=[
+                    dbc.Col([dbc.CardHeader(html.H5("ROC Curves")), dbc.CardBody(dcc.Markdown(roccurve, className="image_big"))], md=6),
+                    dbc.Col([dbc.CardHeader(html.H5("ROC Curves Zoom")), dbc.CardBody(dcc.Markdown(roccurve_zoom, className="image_big"))], md=6),]),
+                dbc.Row(children=[
+                    dbc.Col([dbc.CardHeader(html.H5("Random Forest Confusion Matrix")), dbc.CardBody(dcc.Markdown(rf_confusion))], md=6),
+                    dbc.Col([dbc.CardHeader(html.H5("Neuronal Network Confusion Matrix")), dbc.CardBody(dcc.Markdown(nn_confusion))], md=6),]),
+                ]
 
 
 tab2_content = dbc.Row(children=[
@@ -339,7 +355,7 @@ tab2_content = dbc.Row(children=[
                                 dbc.Button("Train Anomaly Detection Model", id="anomaly_submit",color="success")]),
            
 
-           dbc.Col(children=[dcc.Loading(dcc.Graph(id="anomaly_result"), color="#FF0000")]) ]
+           dbc.Col(children=[dcc.Loading(dcc.Graph(id="anomaly_result"), color="#FF0000", className="loading_anomaly")]) ]
 
         
     ),

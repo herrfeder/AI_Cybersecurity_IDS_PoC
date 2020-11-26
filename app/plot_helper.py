@@ -258,7 +258,7 @@ def plot_anomaly(X_train ,xx ,yy , Z, dash=True):
     fig = go.Figure(data=data, layout=layout)
 
     if dash:
-        return apply_layout(fig, title="", height=800)
+        return apply_layout(fig, title="", height=800, width=1000)
     else:
         fig.show()
 

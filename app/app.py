@@ -149,6 +149,7 @@ NAVBAR = dbc.Navbar(
     color="dark",
     dark=True,
     sticky="top",
+    style={"background-image": "url('https://raw.githubusercontent.com/herrfeder/herrfeder.github.io/master/image.png')"}
 )
 
 
@@ -182,29 +183,46 @@ def return_ip_bar_chart(file_type="", timespan=""):
     
     return ph.plot_ten_most_ip(data_dict, title="",dash=True)
 
+def return_ip_bar_dest_chart(file_type="", timespan=""):
+    data_dict = dh.get_ten_most_dest_ip(file_type, timespan)
+    
+    return ph.plot_ten_most_ip(data_dict, title="",dash=True)
+
 
 def return_data_table(file_type="", timespan=""):
-    df = dh.get_timespan_df(file_type, timespan)
+    df = dh.get_timespan_df(file_type, timespan*60)
 
     return ph.plot_data_table(df.tail(50), fig="", title="")
 
 
 def return_scatter(file_type="", timespan=""):
-    df = dh.get_timespan_df(file_type, timespan)
+    df = dh.get_timespan_df(file_type, timespan*60)
 
     return ph.plot_monitor_scatter(df, title="", dash=True)
 
 
 def return_world(file_type="", timespan=""):
     data_dict = dh.get_longitude_latitude(file_type, timespan)
-    print(data_dict)
     return ph.get_world_plot(data_dict, dash=True)
 
 
-def return_apply_table(file_type=""):
-    df = dh.get_timespan_df(file_type, 15)
+def return_apply_table():
+    df = dh.get_timespan_df("conn", dh.anomaly_detection_counter+600)
 
-    return ph.plot_prediction_table(df.tail(15), fig="", title="")
+    pred = dh.return_anomaly_prediction(df)
+    
+    plot_df = df.tail(99)
+    print(plot_df.shape)
+    plot_df["Prediction_AD"] = pred
+    return ph.plot_prediction_table(plot_df, fig="", title="")
+
+
+
+def return_anomaly_model(file_type="", train_offset="", counter_offset=""):
+
+    X_train, xx, yy, Z = dh.train_anomaly_detection(file_type, train_offset, counter_offset)
+    return ph.plot_anomaly(X_train, xx, yy, Z)
+
 
  
 WORLD_MAP = ""
@@ -220,6 +238,26 @@ for label, value in zip(timespan_labels, timespan_values):
                           "value": value})
 
 
+anomaly_counter_labels = ["5min","10min","15min","30min", "1h"]
+anomaly_counter_values = [5*60, 10*60, 15*60, 30*60, 60*60]
+
+anomaly_counter_list = []
+for label, value in zip(anomaly_counter_labels, anomaly_counter_values):
+    anomaly_counter_list.append({"label": label,
+                                 "value": value})
+
+
+
+anomaly_span_labels = ["3h","6h","12h","24h","48h", "72h"]
+anomaly_span_values = [3, 6, 12, 24, 48, 72]
+
+
+anomaly_span_list = []
+for label, value in zip(anomaly_span_labels, anomaly_span_values):
+    anomaly_span_list.append({"label": label,
+                          "value": value})
+
+
 MONITOR_TIME_DROPDOWN = html.Div([
                         dcc.Dropdown(id='monitor_time_dropdown',
                                      options=timespan_list,
@@ -232,16 +270,23 @@ MONITOR_TIME_LABEL = html.Label("Timespan:",
                                 "padding": 10}) 
 
 
-ANOMALY_DROPDOWN = html.Div([
-                        dcc.Dropdown(id='anomaly_dropdown',
-                                     options=timespan_list,
-                                     value=60)
+ANOMALY_COUNTER_DROPDOWN = html.Div([
+                        dcc.Dropdown(id='anomaly_counter_dropdown',
+                                     options=anomaly_counter_list,
+                                     value=5*60)
+                                     ,], style={"width":"100%"})
 
-                     ,], style={"width":"100%"})
+
+ANOMALY_SPAN_DROPDOWN = html.Div([
+                        dcc.Dropdown(id='anomaly_span_dropdown',
+                                     options=anomaly_span_list,
+                                     value=72)
+                        ,], style={"width":"100%"})
 
 ANOMALY_LABEL = html.Label("Choose Anomaly Model:",
                          style={"padding-left":5,
                                 "padding": 10}) 
+
 
 ### MENU BASED CONTENT ###
 
@@ -255,7 +300,10 @@ MONITOR_FRONTEND = [dbc.Row(children=[
                     dbc.Col([dbc.CardHeader(html.H5("Controls")), dbc.CardBody([MONITOR_TIME_LABEL,MONITOR_TIME_DROPDOWN])], md=1),
                     dbc.Col([dbc.CardHeader(html.H5("Most frequently Source IPs")), 
                              dbc.CardBody(dcc.Loading(dcc.Graph(figure="", id="most_ip_plot"),color="#FF0000"))
-                    ]),
+                    ], md=3),
+                    dbc.Col([dbc.CardHeader(html.H5("Most frequently Destination IPs")), 
+                             dbc.CardBody(dcc.Loading(dcc.Graph(figure="", id="most_ip_dest_plot"),color="#FF0000"))
+                    ],md=3),
                     dbc.Col([dbc.CardHeader(html.H5("Location of Source IPs")),
                              dbc.CardBody(dcc.Loading(dcc.Graph(figure="", id="world_map_plot"),color="#FF0000"))])
                  ]),
@@ -270,14 +318,49 @@ MONITOR_FRONTEND = [dbc.Row(children=[
 
 # CRAWLIN N TRAIN
 
-TRAINING = ""
+tab1_content = dbc.Card(
+    dbc.CardBody(
+        [
+            html.P("Random Forest & Neural Net", className="card-text"),
+            
+        ]
+    ),
+    className="mt-6", style={"padding-top":"20px"}
+)
+
+
+tab2_content = dbc.Row(children=[
+    dbc.Card( 
+        dbc.CardBody(
+        [  dbc.Col( children=[ html.Label("Anomaly Counter Range:", style={"padding-left":5, "padding": 10}),
+                               ANOMALY_COUNTER_DROPDOWN,
+                               html.Label("Anomaly Span Range:", style={"padding-left":5, "padding": 10}),
+                               ANOMALY_SPAN_DROPDOWN,
+                                dbc.Button("Train Anomaly Detection Model", id="anomaly_submit",color="success")]),
+           
+
+           dbc.Col(children=[dcc.Loading(dcc.Graph(id="anomaly_result"), color="#FF0000")]) ]
+
+        
+    ),
+    style={"padding-top":"20px","width":"80%"}
+
+)])
+
+
+TRAINING = dbc.Tabs(
+    [
+        dbc.Tab(tab1_content, label="Random Forest & Neural Net"),
+        dbc.Tab(tab2_content, label="Anomaly Detection"),
+        
+    ])
+
+
+
 
 # APPLY MODEL
 
-APPLY_FRONTEND = [dbc.Row(children=[
-                    dbc.CardHeader(dbc.CardBody([ANOMALY_LABEL, ANOMALY_DROPDOWN]))
-                ]),
-                 dbc.Row(children=[
+APPLY_FRONTEND = [dbc.Row(children=[html.Div(children=[], id="apply_dummy"),
                     dbc.Col([dbc.CardHeader(html.H5("Predict Attacks")), dbc.CardBody(html.Div(children=[], id="apply_data_table"))
                     ]),
                     ]),
@@ -304,25 +387,37 @@ server = app.server
 
 ### CALLBACKS ###
 
-@app.callback([Output('apply_data_table', 'children')],
-               [Input('apply_update', 'n_intervals'),
-                Input('anomaly_dropdown', 'value')])
-def update_table_data(n_intervals, monitor_time_interval):
+@app.callback(Output('anomaly_result', 'figure'),
+               [Input('anomaly_counter_dropdown', 'value'),
+                Input('anomaly_span_dropdown', 'value'),
+                Input('anomaly_submit', 'n_clicks')])
+def return_anomaly(counter_value, span_value, anomaly_click):
     dh.update_source("conn")
-    return return_apply_table("conn"), 
+
+    return return_anomaly_model(file_type="conn", train_offset=span_value, counter_offset=counter_value)
+
+
+@app.callback(Output('apply_data_table', 'children'),
+               [Input('apply_update', 'n_intervals'),])
+def update_apply_data(n_intervals):
+    dh.update_source("conn")
+
+    return return_apply_table()
          
 
 
 @app.callback([Output('monitor_data_table', 'children'),
                Output('most_ip_plot', 'figure'),
+                Output('most_ip_dest_plot', 'figure'),
                Output('monitor_scatter_plot', 'figure'),
                Output('world_map_plot', 'figure')],
                [Input('table_update', 'n_intervals'),
                 Input('monitor_time_dropdown', 'value')])
-def update_table_data(n_intervals, monitor_time_interval):
+def update_monitor_table(n_intervals, monitor_time_interval):
     dh.update_source("conn")
     return (return_data_table("conn", timespan=monitor_time_interval), 
            return_ip_bar_chart("conn", timespan=monitor_time_interval),
+           return_ip_bar_dest_chart("conn", timespan=monitor_time_interval),
            return_scatter("conn", timespan=monitor_time_interval),
            return_world("conn", timespan=monitor_time_interval))
 

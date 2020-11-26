@@ -5,6 +5,13 @@ import sys
 import numpy as np
 import pickle
 import joblib
+from autokeras import StructuredDataClassifier
+import tensorflow as tf
+import keras
+import numpy as np
+from numpy import asarray
+import matplotlib.pyplot as plt
+from sklearn.ensemble import IsolationForest
 
 try:
     from app.utilities import zeeklogreader
@@ -42,10 +49,20 @@ class IDSData():
         self.df_d = {"conn":pd.DataFrame(),
                      "temp":""}
 
+        
         self.model_path = os.path.join(self.base_path, "models")
+        
+        # RANDOM FOREST
         self.sup_conn_rf_path = os.path.join(self.model_path, "random_forest.joblib")
         self.sup_conn_rf_model = joblib.load(self.sup_conn_rf_path)
         self.sup_conn_rf_cols = ['duration','orig_pkts','orig_ip_bytes','resp_pkts','resp_ip_bytes']
+
+        # NEURAL NET
+        self.conn_nn_path = os.path.join(self.model_path, "nn_2_2")
+        self.nn_conn_model = keras.models.load_model(self.conn_nn_path)
+        self.sup_conn_nn_cols = ['duration','orig_pkts','orig_ip_bytes','resp_pkts','resp_ip_bytes']
+
+
 
         self.df_cache_path = os.path.join(self.base_path,"utilities/df_cache")
         self.latlon_cache_path = os.path.join(self.df_cache_path, "latlon.p")
@@ -98,6 +115,7 @@ class IDSData():
                 self.df_d["temp"] = self.parse_json_to_pandas(file_type,update=True)
                 self.convert_zeek_df("temp")
                 self.predict_conn_sup_rf("temp")
+                self.predict_conn_nn("temp")
                 self.df_d[file_type] = self.df_d[file_type].append(self.df_d["temp"])               
 
 
@@ -108,6 +126,71 @@ class IDSData():
     def predict_conn_sup_rf(self, file_type=""):
         results = self.sup_conn_rf_model.predict(self.df_d[file_type][self.sup_conn_rf_cols])
         self.df_d[file_type]["Prediction_rf"] = results
+
+    def predict_conn_nn(self, file_type=""):
+        results = self.nn_conn_model.predict(self.df_d[file_type][self.sup_conn_rf_cols])
+        self.df_d[file_type]["Prediction_nn"] = results
+
+
+    def train_anomaly_detection(self, file_type="", train_offset=24, counter_offset=900):
+        
+        rng = np.random.RandomState(42)
+
+        time_offset = self.df_d[file_type].index.max() - pd.DateOffset(hours=train_offset) 
+
+        timespan_df = self.df_d[file_type][self.df_d[file_type].index > time_offset]
+       
+        grouper_offset = str(counter_offset) + 's'
+
+        train_df = pd.DataFrame()
+
+        train_df["port_5m"] = timespan_df.groupby(pd.Grouper(freq=grouper_offset, base=30, label='right'))["id.orig_p"].nunique()
+        train_df["duration_5m"] = timespan_df.groupby(pd.Grouper(freq=grouper_offset, base=30, label='right'))["duration"].nunique()
+
+        self.anomaly_detection_port_max = train_df["port_5m"].max()
+        self.anomaly_detection_duration_max = train_df["duration_5m"].max()
+
+        train_df["port_5m_norm"] = (train_df["port_5m"] / train_df["port_5m"].max())
+        train_df["duration_5m_norm"] = (train_df["duration_5m"] / train_df["duration_5m"].max())
+
+        train_header = ["port_5m_norm", "duration_5m_norm"]
+        X_train = train_df[train_header].to_numpy()
+
+        clf = IsolationForest(max_samples=100, random_state=rng)
+        clf.fit(X_train)
+        
+        self.anomaly_detection_port_duration = clf
+        self.anomaly_detection_counter = counter_offset
+              
+        xx = yy = np.linspace(0, 1, 100)
+        Z = clf.decision_function(np.c_[xx.ravel(), yy.ravel()])
+        Z = Z.reshape(xx.shape)
+
+        return X_train, xx, yy, Z
+
+
+    def return_last_anomaly_metrics(self, timespan_df):
+
+        ano_metrics = {}
+        ano_metrics["uniq_ports"] = timespan_df["id.orig_p"].nunique() / self.anomaly_detection_port_max
+        ano_metrics["duration"] = timespan_df["duration"].nunique() / self.anomaly_detection_duration_max
+        #ano_metrics["uniq_hosts"] = timespan_df["id.orig_h"].mean()
+        #ano_metrics["all_requests"] = timespan_df.count()[0]
+
+        return [ano_metrics["uniq_ports"],ano_metrics["duration"]]
+
+
+    def return_anomaly_prediction(self, df):
+
+        df.reset_index(inplace=True)
+
+        offset = df.ts.max() - pd.DateOffset(seconds=self.anomaly_detection_counter) 
+        metric_array = [self.return_last_anomaly_metrics(df.iloc[:-100+i][df.iloc[:-100+i].ts > offset]) for i in range(1,100)]
+        prediction = self.anomaly_detection_port_duration.predict(metric_array)
+
+        return prediction
+
+
 
 
     ########################
@@ -160,9 +243,11 @@ class IDSData():
     ###########################
 
     def get_timespan_df(self, file_type, time_offset):
-        time_delta = self.df_d[file_type].index.max() - datetime.timedelta(minutes=time_offset)
+        time_delta = self.df_d[file_type].index.max() - datetime.timedelta(seconds=time_offset)
 
         return self.df_d[file_type][self.df_d[file_type].index > time_delta]
+
+
 
 
     def get_lonlat_from_ip(self, ip):
@@ -181,7 +266,7 @@ class IDSData():
 
   
     def get_ten_most_source_ip(self, file_type, time_offset):
-        df = self.get_timespan_df(file_type, time_offset)
+        df = self.get_timespan_df(file_type, time_offset*60)
         dict_ip = df["id.orig_h"].value_counts()[1:11].to_dict()
 
         ips=list(dict_ip.keys())[::-1]
@@ -190,8 +275,18 @@ class IDSData():
         return {"ips": ips, "number": number}
 
 
+    def get_ten_most_dest_ip(self, file_type, time_offset):
+        df = self.get_timespan_df(file_type, time_offset*60)
+        dict_ip = df["id.resp_h"].value_counts()[1:11].to_dict()
+
+        ips=list(dict_ip.keys())[::-1]
+        number=list(dict_ip.values())[::-1]
+
+        return {"ips": ips, "number": number}
+
+
     def get_longitude_latitude(self, file_type, time_offset):
-        ip_dict = self.get_ten_most_source_ip(file_type, time_offset)
+        ip_dict = self.get_ten_most_source_ip(file_type, time_offset*60)
         ips=ip_dict["ips"]
         lon_lat_list = []
 

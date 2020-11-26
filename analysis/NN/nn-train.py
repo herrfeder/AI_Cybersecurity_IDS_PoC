@@ -19,7 +19,7 @@ print(X.shape, y.shape)
 X = X.astype('float32')
 y = LabelEncoder().fit_transform(y)
 # separate into train and test sets
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, stratify=y,random_state=42)
 print("shape of the splitting Data X_train, X_test, y_train, y_test")
 print(X_train.shape, X_test.shape, y_train.shape, y_test.shape)
 

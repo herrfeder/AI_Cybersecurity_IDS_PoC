@@ -4,14 +4,13 @@
 
 ## Installation
 
-An example of this web app is temporary accessible on https://federland.dnshome.de/bitcoinprediction .
+An example of this web app is temporary accessible on https://dev.datahack.de/aicspoc/ (Password Protected).
 Please be gentle, the resources are restricted. This app __isn't responsive__.
 
 ### Docker Instructions
 
 1. Create directory and download Dockerfile:
     ```
-    mkdir bitcoinpred_docker && cd bitcoinpred_docker
     wget https://raw.githubusercontent.com/herrfeder/AI_Cybersecurity_IDS_PoC/main/Dockerfile
     ```
 

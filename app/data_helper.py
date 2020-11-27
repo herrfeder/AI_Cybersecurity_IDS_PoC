@@ -53,7 +53,7 @@ class IDSData():
         self.model_path = os.path.join(self.base_path, "models")
         
         # RANDOM FOREST
-        self.sup_conn_rf_path = os.path.join(self.model_path, "random_forest.joblib")
+        self.sup_conn_rf_path = os.path.join(self.model_path, "RandomForestClassifier_HP_opti.joblib")
         self.sup_conn_rf_model = joblib.load(self.sup_conn_rf_path)
         self.sup_conn_rf_cols = ['duration','orig_pkts','orig_ip_bytes','resp_pkts','resp_ip_bytes']
 
@@ -144,7 +144,7 @@ class IDSData():
 
         train_df = pd.DataFrame()
 
-        train_df["port_5m"] = timespan_df.groupby(pd.Grouper(freq=grouper_offset, base=30, label='right'))["id.orig_p"].nunique()
+        train_df["port_5m"] = timespan_df.groupby(pd.Grouper(freq=grouper_offset, base=30, label='right'))["id.resp_p"].nunique()
         train_df["duration_5m"] = timespan_df.groupby(pd.Grouper(freq=grouper_offset, base=30, label='right'))["duration"].nunique()
 
         self.anomaly_detection_port_max = train_df["port_5m"].max()
@@ -172,7 +172,7 @@ class IDSData():
     def return_last_anomaly_metrics(self, timespan_df):
 
         ano_metrics = {}
-        ano_metrics["uniq_ports"] = timespan_df["id.orig_p"].nunique() / self.anomaly_detection_port_max
+        ano_metrics["uniq_ports"] = timespan_df["id.resp_p"].nunique() / self.anomaly_detection_port_max
         ano_metrics["duration"] = timespan_df["duration"].nunique() / self.anomaly_detection_duration_max
         #ano_metrics["uniq_hosts"] = timespan_df["id.orig_h"].mean()
         #ano_metrics["all_requests"] = timespan_df.count()[0]

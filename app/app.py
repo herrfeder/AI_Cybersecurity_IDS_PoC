@@ -292,7 +292,7 @@ ANOMALY_LABEL = html.Label("Choose Anomaly Model:",
 
 # CONCEPT
 
-CONCEPT = ""
+CONCEPT = html.Img(src="https://raw.githubusercontent.com/herrfeder/herrfeder.github.io/master/pitch_final.png", style={"width":"100%"})
 
 # MONITOR TRAFFIC
 

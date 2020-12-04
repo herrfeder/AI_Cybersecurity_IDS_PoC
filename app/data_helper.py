@@ -74,7 +74,7 @@ class IDSData():
 
         # NEURAL NET
         self.conn_nn_path = os.path.join(self.model_path, "nn_2_2")
-        if not os.path.exists(self.sup_nn_path):
+        if not os.path.exists(self.conn_nn_path):
             print("You need to place the Model Files and Folders into the correct locations")
             sys.exit()
 

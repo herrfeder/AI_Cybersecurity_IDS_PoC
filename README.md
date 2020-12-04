@@ -2,6 +2,8 @@
 
 ![bwi_hackathon_badge](https://abload.de/img/bwi_dataanalyticshack7ujy4.png)
 
+
+
 ## Installation
 
 An example of this web app is temporary accessible on https://dev.datahack.de/aicspoc/ (Password Protected).

@@ -5,7 +5,6 @@ from pandas.tseries.offsets import DateOffset
 import pandas as pd
 import numpy as np
 import dash_table
-from ipdb import set_trace
 import matplotlib.pyplot as plt
 
 import numpy as np      

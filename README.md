@@ -26,7 +26,7 @@ Please be gentle, the resources are restricted. This app __isn't responsive__.
     docker run -p 8050:8050 -v {zeek_location}:/home/datascientist/zeek_input broai:latest
     ```
 
-4. Go to http://127.0.0.1:8050/
+4. Go to http://127.0.0.1:8050/aicspoc/
 
 
 # CLONE -> BUILD -> RUN -> HAPPY

@@ -23,7 +23,6 @@ except:
     from utilities import zeekheader
 import pathlib
 import datetime
-from ipdb import set_trace
 import ipinfo
 
 

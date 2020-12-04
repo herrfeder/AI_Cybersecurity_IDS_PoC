@@ -29,7 +29,15 @@ import ipinfo
 
 
 class IDSData():
-
+    '''
+    IDSData manages the input processing and updating of the JSON Zeek Logs and the modelling based on these logs, moreover:
+            - LOGPARSING Read and update JSON-based logs from utilities/parsezeeklogs and write into DataFrame
+            - PREDICTION Predict with pretrained Models and Anomaly Detection from Webapp Attacks
+            - WRANGLING Data Preprocessing > convert time, remove unused columns, blacklist IPs
+            - PLOTRELATED Aggregating data for plots
+    
+    TODO: The dirty dirty dirty section needs proper functionality and no hardcoded strings
+    '''
     def __init__(self):
         self.base_path = pathlib.Path(__file__).parent.resolve()
 
@@ -51,34 +59,56 @@ class IDSData():
 
         
         self.model_path = os.path.join(self.base_path, "models")
+        if not os.path.exists(self.model_path):
+            os.mkdir(self.model_path)
+          
+
         
         # RANDOM FOREST
         self.sup_conn_rf_path = os.path.join(self.model_path, "RandomForestClassifier_HP_opti.joblib")
+        if not os.path.exists(self.sup_conn_rf_path):
+            print("You need to place the Model Files and Folders into the correct locations")
+            sys.exit()
+
         self.sup_conn_rf_model = joblib.load(self.sup_conn_rf_path)
         self.sup_conn_rf_cols = ['duration','orig_pkts','orig_ip_bytes','resp_pkts','resp_ip_bytes']
 
         # NEURAL NET
         self.conn_nn_path = os.path.join(self.model_path, "nn_2_2")
+        if not os.path.exists(self.sup_nn_path):
+            print("You need to place the Model Files and Folders into the correct locations")
+            sys.exit()
+
         self.nn_conn_model = keras.models.load_model(self.conn_nn_path)
         self.sup_conn_nn_cols = ['duration','orig_pkts','orig_ip_bytes','resp_pkts','resp_ip_bytes']
 
-
-
+        # CACHES
+        ## DataFrame Cache
         self.df_cache_path = os.path.join(self.base_path,"utilities/df_cache")
+        if not os.path.exists(self.df_cache_path):
+            os.mkdir(self.df_cache_path)
+        ## IP to LongLat Cache because of ipinfo ratelimiting
         self.latlon_cache_path = os.path.join(self.df_cache_path, "latlon.p")
-
-
         if os.path.exists(self.latlon_cache_path):
             self.latlon_cache = pickle.load( open( self.latlon_cache_path, "rb" ) )
         else:
             self.latlon_cache = {}
 
+        
+        
 
-        # dirty dirty dirty SECTION, hardcoded time offset and hardcoded blacklist IPs
+        # dirty dirty dirty SECTION
+        ## hardcoded time offset as the log reader won't know the absolute Log time as it is an offset from epoch
+        ## 1. One option would be to write the starting timestamp into an pickle
+        ## 2. Another option would be to read the Time again on everz update
         self.conn_timestamp = "2020-11-21-18-54-32"
+        ## Blacklist IPs should be an functionality in the web app
         self.blacklist_ips = ["94.102.49.191"]
 
 
+    ########################
+    ###### LOGPARSING ######
+    ########################
     def parse_json_to_pandas(self, file_type="",update=False):
         if not update:
             json_input = "\n".join(self.data_read_f[file_type]())
@@ -122,7 +152,6 @@ class IDSData():
     ########################
     ###### PREDICTION ######
     ########################
-
     def predict_conn_sup_rf(self, file_type=""):
         results = self.sup_conn_rf_model.predict(self.df_d[file_type][self.sup_conn_rf_cols])
         self.df_d[file_type]["Prediction_rf"] = results
@@ -133,17 +162,14 @@ class IDSData():
 
 
     def train_anomaly_detection(self, file_type="", train_offset=24, counter_offset=900):
-        
+        # highly experimental
+
         rng = np.random.RandomState(42)
-
         time_offset = self.df_d[file_type].index.max() - pd.DateOffset(hours=train_offset) 
-
         timespan_df = self.df_d[file_type][self.df_d[file_type].index > time_offset]
-       
         grouper_offset = str(counter_offset) + 's'
 
         train_df = pd.DataFrame()
-
         train_df["port_5m"] = timespan_df.groupby(pd.Grouper(freq=grouper_offset, base=30, label='right'))["id.resp_p"].nunique()
         train_df["duration_5m"] = timespan_df.groupby(pd.Grouper(freq=grouper_offset, base=30, label='right'))["duration"].nunique()
 
@@ -191,12 +217,9 @@ class IDSData():
         return prediction
 
 
-
-
     ########################
     ###### WRANGLING #######
     ########################
-
     def convert_zeek_df(self, file_type=""):
         self.convert_epoch_ts(file_type)
         self.sort_set_index(file_type)
@@ -239,9 +262,8 @@ class IDSData():
 
 
     ###########################
-    ###### PLOT RELATED #######
+    ###### PLOTRELATED #######
     ###########################
-
     def get_timespan_df(self, file_type, time_offset):
         time_delta = self.df_d[file_type].index.max() - datetime.timedelta(seconds=time_offset)
 

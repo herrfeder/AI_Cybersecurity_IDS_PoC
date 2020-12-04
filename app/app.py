@@ -34,7 +34,7 @@ dh.update_source("conn")
 
 
 
-# Lists for Project Menu    
+# Lists for Project Menu and associated Icons    
 acc_str_list = ["CONCEPT",
                 "MONITOR TRAFFIC",
                 "CRAWL N TRAIN", 
@@ -224,6 +224,8 @@ def return_anomaly_model(file_type="", train_offset="", counter_offset=""):
     return ph.plot_anomaly(X_train, xx, yy, Z)
 
 
+
+
  
 WORLD_MAP = ""
 MONITOR_SCATTER = ""
@@ -372,8 +374,6 @@ TRAINING = dbc.Tabs(
     ])
 
 
-
-
 # APPLY MODEL
 
 APPLY_FRONTEND = [dbc.Row(children=[html.Div(children=[], id="apply_dummy"),
@@ -382,6 +382,8 @@ APPLY_FRONTEND = [dbc.Row(children=[html.Div(children=[], id="apply_dummy"),
                     ]),
                     dcc.Interval(id='apply_update', interval=1*5000, n_intervals=0),
                 ]
+
+
 
 ### WEBAPP INIT ###
 
@@ -403,6 +405,8 @@ server = app.server
 
 ### CALLBACKS ###
 
+
+# create anomaly model and output visualisation of isolation forest
 @app.callback(Output('anomaly_result', 'figure'),
                [Input('anomaly_counter_dropdown', 'value'),
                 Input('anomaly_span_dropdown', 'value'),
@@ -412,7 +416,7 @@ def return_anomaly(counter_value, span_value, anomaly_click):
 
     return return_anomaly_model(file_type="conn", train_offset=span_value, counter_offset=counter_value)
 
-
+# output table with predictions
 @app.callback(Output('apply_data_table', 'children'),
                [Input('apply_update', 'n_intervals'),])
 def update_apply_data(n_intervals):
@@ -421,7 +425,7 @@ def update_apply_data(n_intervals):
     return return_apply_table()
          
 
-
+# update output table
 @app.callback([Output('monitor_data_table', 'children'),
                Output('most_ip_plot', 'figure'),
                 Output('most_ip_dest_plot', 'figure'),

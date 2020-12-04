@@ -1,24 +1,26 @@
-FROM python:3.7.6-buster
+FROM python:3.8-buster
 
-RUN pip install numpy==1.17
+RUN pip install numpy
 RUN pip install scipy
 RUN pip install pandas==1.0.0
 RUN pip install matplotlib
 RUN pip install nltk
-RUN pip install statsmodels
+RUN pip install statsmodels==0.11.0
 RUN pip install sklearn
 RUN pip install tensorflow
 RUN pip install keras
+RUN pip install autokeras                                                                                                                                                                
+RUN pip install keras-tuner 
 
-RUN pip install dash
-RUN pip install dash-renderer
-RUN pip install dash-html-components
-RUN pip install dash-bootstrap-components
-RUN pip install dash-core-components
+RUN pip install dash==1.13.4
+RUN pip install dash-bootstrap-components==0.9.2
 RUN pip install plotly==4.5.0
 RUN pip install wordcloud
 
 RUN pip install gunicorn
+RUN pip install pygtail                                                                                                                                                                  
+RUN pip install ipinfo   
+
 
 RUN useradd -m datascientist
 USER datascientist

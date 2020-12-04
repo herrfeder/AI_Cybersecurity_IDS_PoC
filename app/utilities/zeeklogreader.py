@@ -82,4 +82,4 @@ class ZeekLogReader():
 
 if __name__ == "__main__":
     zlr = ZeekLogReader()
-    zlr.update_logs()
+    zlr.update_all_logs()

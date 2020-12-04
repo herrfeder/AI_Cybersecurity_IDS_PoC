@@ -1,3 +1,5 @@
+# necessary for parsing zeek conn.log when not reading from the beginning of the file for updating
+
 conn_fields = [  "ts","uid","id.orig_h",
                 "id.orig_p","id.resp_h","id.resp_p",
                 "proto","service","duration",

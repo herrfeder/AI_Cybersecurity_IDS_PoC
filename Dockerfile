@@ -27,9 +27,11 @@ USER datascientist
 
 WORKDIR /home/datascientist/
 
+ENV BLAH blaasdfh
 # have to be edited
 RUN git clone https://github.com/herrfeder/AI_Cybersecurity_IDS_PoC
 WORKDIR /home/datascientist/AI_Cybersecurity_IDS_PoC
+
 ENV ENVIRONMENT production
 
 RUN echo '#!/bin/bash' > entrypoint.sh

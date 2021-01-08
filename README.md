@@ -1,5 +1,7 @@
 # AI_Cybersecurity_IDS_PoC
 
+  * Winning Solution of BWI Data Analytics Hackathon 2020
+
 ![bwi_hackathon_badge](https://abload.de/img/bwi_dataanalyticshack7ujy4.png)
 
 ## App Screenshots
@@ -8,7 +10,7 @@
 
 | Monitoring Dashboard | Model Performance | Anomaly Training | Application of Models |
 |--------------------------------------|--------------------------------------|--------------------------------------|--------------------------------------|
-| ![](https://github.com/herrfeder/AI_Cybersecurity_IDS_PoC/raw/main/screenshots/analysis_dashboard.png) | ![](https://github.com/herrfeder/AI_Cybersecurity_IDS_PoC/security/dependabot) | ![](https://github.com/herrfeder/AI_Cybersecurity_IDS_PoC/raw/main/screenshots/train_anomaly.png) | ![](https://github.com/herrfeder/AI_Cybersecurity_IDS_PoC/raw/main/screenshots/apply_model.png) |
+| ![](https://github.com/herrfeder/AI_Cybersecurity_IDS_PoC/raw/main/screenshots/analysis_dashboard.png) | ![](https://github.com/herrfeder/AI_Cybersecurity_IDS_PoC/raw/main/screenshots/model_performance.png) | ![](https://github.com/herrfeder/AI_Cybersecurity_IDS_PoC/raw/main/screenshots/train_anomaly.png) | ![](https://github.com/herrfeder/AI_Cybersecurity_IDS_PoC/raw/main/screenshots/apply_model.png) |
 
 ## Concept
 

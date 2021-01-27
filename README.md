@@ -66,6 +66,8 @@ Please be gentle, the resources are restricted. This app __isn't responsive__.
     ```
     docker run -p 8050:8050 -v {zeek_location}:/home/datascientist/zeek_input broai:latest
     ```
+    
+    > Please be aware, for now `zeek_location` has to be provided by you and is a folder which contains your running `conn.log`
 
 4. Go to http://127.0.0.1:8050/aicspoc/
 

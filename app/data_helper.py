@@ -275,12 +275,17 @@ class IDSData():
             handler = ipinfo.getHandler()
             details = handler.getDetails(ip)
 
-            lon = details.longitude.strip("_")
-            lat = details.latitude.strip("_")
+            # have to do this check as with private network IPs details won't hold any info but None
+            if not (details.longitude == None):
+                lon = details.longitude.strip("_")
+                lat = details.latitude.strip("_")
 
-            self.latlon_cache[ip] = (lon, lat)
+                self.latlon_cache[ip] = (lon, lat)
 
-            return (lon,lat)
+                return (lon,lat)
+            else:
+                self.latlon_cache[ip] = (0,0)
+                return (0,0)
 
   
     def get_ten_most_source_ip(self, file_type, time_offset):

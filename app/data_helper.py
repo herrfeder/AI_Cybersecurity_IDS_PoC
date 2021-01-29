@@ -94,13 +94,10 @@ class IDSData():
             self.latlon_cache = {}
 
         
-        
+        self.conn_timestamp = self.zlr.return_conn_timestamp()
 
         # dirty dirty dirty SECTION
-        ## hardcoded time offset as the log reader won't know the absolute Log time as it is an offset from epoch
-        ## 1. One option would be to write the starting timestamp into an pickle
-        ## 2. Another option would be to read the Time again on everz update
-        self.conn_timestamp = "2020-11-21-18-54-32"
+        
         ## Blacklist IPs should be an functionality in the web app
         self.blacklist_ips = ["94.102.49.191"]
 

@@ -58,13 +58,13 @@ def plot_ten_most_ip(data_dict, title="", dash=False):
 def pred_rf_style(df):
 
     df['Status_RF'] = df['Prediction_rf'].apply(lambda x:
-    '🌲😎' if x < 0.6 else (
-    '🌲😨' if x < 0.9 else '🌲😱' 
+    '🎄😎' if x < 0.6 else (
+    '🎄😨' if x < 0.9 else '🎄😱' 
     ))
 
     df['Status_NN'] = df['Prediction_nn'].apply(lambda x:
-    '🕸️😎' if x < 0.6 else (
-    '🕸️😨' if x < 0.9 else '🕸️😱' 
+    '❄️😎' if x < 0.6 else (
+    '❄️😨' if x < 0.9 else '❄️😱' 
     ))
 
     df['Status_AD'] = df['Prediction_AD'].apply(lambda x:

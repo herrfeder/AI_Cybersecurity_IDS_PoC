@@ -16,7 +16,11 @@ class ZeekLogReader():
     def __init__(self, logoffsets="logoffsets"):
         self.base_path = pathlib.Path(__file__).parent.resolve()
         self.offset_path = os.path.join(self.base_path, "logoffsets")
+        if not os.path.exists(self.offset_path):
+            os.mkdir(self.offset_path)
         self.tmp_path = os.path.join(self.base_path,"logtemp")
+        if not os.path.exists(self.tmp_path):
+            os.mkdir(self.tmp_path)
         self.log_path_prefix = os.path.join(self.base_path, "../../../zeek_input")
 
         self.conn_log_file = "conn.log"

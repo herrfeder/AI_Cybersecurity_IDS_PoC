@@ -12,12 +12,12 @@ class ParseZeekLogs(object):
 
     """
 
-    def __init__(self, filepath="", fd="", batchsize=500, fields=None, types=None, 
-                seperator=None, set_seperator=None, empty_field=None, unset_field=None,
-                output_format=None, ignore_keys=[], meta={}, safe_headers=False):
-        
+    def __init__(self, filepath="", fd="", batchsize=500, fields=None, types=None,
+                 seperator=None, set_seperator=None, empty_field=None, unset_field=None,
+                 output_format=None, ignore_keys=[], meta={}, safe_headers=False):
+
         if filepath:
-            self.fd = open(filepath,"r")
+            self.fd = open(filepath, "r")
         elif fd:
             self.fd = fd
         self.options = OrderedDict()
@@ -39,7 +39,8 @@ class ParseZeekLogs(object):
                 # Parse the options out
                 if l.startswith("#separator"):
                     key = str(l[1:].split(" ")[0])
-                    value = str.encode(l[1:].split(" ")[1].strip()).decode('unicode_escape')
+                    value = str.encode(l[1:].split(
+                        " ")[1].strip()).decode('unicode_escape')
                     self.options[key] = value
                 elif l.startswith("#"):
                     key = str(l[1:].split(self.options.get('separator'))[0])
@@ -65,9 +66,8 @@ class ParseZeekLogs(object):
             self.set_seperator = set_seperator
             self.empty_field = empty_field
             self.unset_field = unset_field
-            
-            self.firstLine = l
 
+            self.firstLine = l
 
         # Convert field names if safe_headers is enabled
         if self.safe_headers is True:
@@ -119,9 +119,10 @@ class ParseZeekLogs(object):
                         retVal[x] = ""
                     # Save the record field if the field isn't filtered out
                     record[converted_field_name] = retVal[x]
-          
+
             # Convert values to the appropriate record type
-            record = self.convert_values(record, self.ignore_keys, self.data_types)
+            record = self.convert_values(
+                record, self.ignore_keys, self.data_types)
 
             if record is not None and self.output_format == "json":
                 # Output will be json

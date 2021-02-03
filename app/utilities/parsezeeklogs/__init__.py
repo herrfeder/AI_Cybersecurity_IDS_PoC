@@ -21,8 +21,9 @@ class ParseZeekLogs(object):
         elif fd:
             self.fd = fd
         else:
-	    sys.exit(1)
-	self.options = OrderedDict()
+	        sys.exit(1)
+
+        self.options = OrderedDict()
         self.firstRun = True
         self.filtered_fields = fields
         self.batchsize = batchsize
@@ -86,7 +87,10 @@ class ParseZeekLogs(object):
             self.data_types[self.fields[i]] = self.types[i]
 
     def __del__(self):
-        self.fd.close()
+        if hasattr(self, 'fd'):
+            self.fd.close() 
+        else:
+            sys.exit(1)
 
     def __iter__(self):
         return self

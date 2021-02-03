@@ -2,7 +2,7 @@ from json import loads, dumps
 from collections import OrderedDict
 from datetime import datetime
 from traceback import print_exc
-
+import sys
 
 class ParseZeekLogs(object):
     """Class that parses Zeek logs and allows log data to be output in CSV or json format.
@@ -20,7 +20,9 @@ class ParseZeekLogs(object):
             self.fd = open(filepath, "r")
         elif fd:
             self.fd = fd
-        self.options = OrderedDict()
+        else:
+	    sys.exit(1)
+	self.options = OrderedDict()
         self.firstRun = True
         self.filtered_fields = fields
         self.batchsize = batchsize

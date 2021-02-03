@@ -133,3 +133,5 @@ dmypy.json
 app/utilities/logoffsets/*
 app/utilities/df_cache/*
 
+# dev cicd
+.devops

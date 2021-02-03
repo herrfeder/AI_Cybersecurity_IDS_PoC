@@ -3,10 +3,11 @@ import sys
 sys.path.append('..')
 
 from app.utilities.parsezeeklogs import ParseZeekLogs
+from app.utilities.zeekheader import *
+from app.utilites.zeeklogreader import ZeekLogReader
 
-pzl = ParseZeekLogs()
 
-class test_ParseZeekLogs(object):
+class test_logparsing(object):
 
-  def __init__():
-    pass
+    def __init__():
+        self.testlog_path = "tests"

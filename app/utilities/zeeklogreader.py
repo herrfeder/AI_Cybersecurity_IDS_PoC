@@ -42,10 +42,11 @@ class ZeekLogReader():
         self.empty_field = ['(empty)']
         self.unset_field = ['-']
 
-    def read_raw_logs(self, log_file="", start=False):
-        offset_path = os.path.join(
-            self.offset_path,
-            self.conn_log_file + ".offset")
+    def read_raw_logs(self, log_file="", start=False, offset_path=""):
+        if not offset_path:
+            offset_path = os.path.join(
+                self.offset_path,
+                self.conn_log_file + ".offset")
         if start:
             if os.path.exists(offset_path):
                 os.remove(offset_path)

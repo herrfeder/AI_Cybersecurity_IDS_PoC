@@ -18,6 +18,7 @@ class TestLogparsing(object):
     @pytest.fixture(autouse=True) 
     def _setup(self):
         self.testlog_path = "testdata/conn.log"
+        self.offset_path = "testdata/log_offset"
         self.conn_fields = zeekheader.conn_fields
         self.conn_types = zeekheader.conn_types
         self.seperator = '\t'
@@ -40,7 +41,8 @@ class TestLogparsing(object):
 
         return pzl
 
-    def test_read_raw_conn_logs_filepath(self):
+    # parsezeeklogs itself
+    def test_read_parsezeeklogs(self):
         pzl = self.init_parse_zeek_logs(filepath=self.testlog_path)
 
         for log_record in pzl:
@@ -49,7 +51,8 @@ class TestLogparsing(object):
                 assert log_record_json["ts"] != ""
 
 
-    def test_read_raw_logs_fd(self):
+    # testing zeeklogreader
+    def test_read_raw_logs_start_fd(self):
         zlr = ZeekLogReader()
 
         zlr_rrl = zlr.read_raw_logs(self.testlog_path, start=False)
@@ -64,4 +67,13 @@ class TestLogparsing(object):
                 assert re.search("^[1-9][1-9]",log_record)
 
 
+    def test_read_raw_logs_offset_fd(self):
+        zlr = ZeekLogReader()
 
+        zlr_rrl = zlr.read_raw_logs(self.testlog_path, start=False, offset_path=self.offset_path)
+
+    
+        for log_record in zlr_rrl:
+            if log_record is not None:
+                print(log_record)
+                assert re.search("^[1-9][1-9]",log_record)

@@ -1,0 +1,26 @@
+listening on wlp4s0
+
+%3|1612643013.353|FAIL|rdkafka#producer-1| [thrd:zeek_test_kafka_1:9092/bootstrap]: zeek_test_kafka_1:9092/bootstrap: Failed to resolve 'zeek_test_kafka_1:9092': Name or service not known (after 402645023ms in state INIT)
+%3|1612643013.353|ERROR|rdkafka#producer-1| [thrd:zeek_test_kafka_1:9092/bootstrap]: zeek_test_kafka_1:9092/bootstrap: Failed to resolve 'zeek_test_kafka_1:9092': Name or service not known (after 402645023ms in state INIT)
+%3|1612643013.353|ERROR|rdkafka#producer-1| [thrd:zeek_test_kafka_1:9092/bootstrap]: 1/1 brokers are down
+%3|1612643013.355|FAIL|rdkafka#producer-2| [thrd:zeek_test_kafka_1:9092/bootstrap]: zeek_test_kafka_1:9092/bootstrap: Failed to resolve 'zeek_test_kafka_1:9092': Name or service not known (after 402645024ms in state INIT)
+%3|1612643013.355|ERROR|rdkafka#producer-2| [thrd:zeek_test_kafka_1:9092/bootstrap]: zeek_test_kafka_1:9092/bootstrap: Failed to resolve 'zeek_test_kafka_1:9092': Name or service not known (after 402645024ms in state INIT)
+%3|1612643013.355|ERROR|rdkafka#producer-2| [thrd:zeek_test_kafka_1:9092/bootstrap]: 1/1 brokers are down
+%3|1612643013.357|FAIL|rdkafka#producer-3| [thrd:zeek_test_kafka_1:9092/bootstrap]: zeek_test_kafka_1:9092/bootstrap: Failed to resolve 'zeek_test_kafka_1:9092': Name or service not known (after 402645026ms in state INIT)
+%3|1612643013.357|ERROR|rdkafka#producer-3| [thrd:zeek_test_kafka_1:9092/bootstrap]: zeek_test_kafka_1:9092/bootstrap: Failed to resolve 'zeek_test_kafka_1:9092': Name or service not known (after 402645026ms in state INIT)
+%3|1612643013.357|ERROR|rdkafka#producer-3| [thrd:zeek_test_kafka_1:9092/bootstrap]: 1/1 brokers are down
+%3|1612643013.933|FAIL|rdkafka#producer-4| [thrd:zeek_test_kafka_1:9092/bootstrap]: zeek_test_kafka_1:9092/bootstrap: Failed to resolve 'zeek_test_kafka_1:9092': Name or service not known (after 402645603ms in state INIT)
+%3|1612643013.933|ERROR|rdkafka#producer-4| [thrd:zeek_test_kafka_1:9092/bootstrap]: zeek_test_kafka_1:9092/bootstrap: Failed to resolve 'zeek_test_kafka_1:9092': Name or service not known (after 402645603ms in state INIT)
+%3|1612643013.933|ERROR|rdkafka#producer-4| [thrd:zeek_test_kafka_1:9092/bootstrap]: 1/1 brokers are down
+%3|1612643021.995|FAIL|rdkafka#producer-5| [thrd:zeek_test_kafka_1:9092/bootstrap]: zeek_test_kafka_1:9092/bootstrap: Failed to resolve 'zeek_test_kafka_1:9092': Name or service not known (after 402653665ms in state INIT)
+%3|1612643021.995|ERROR|rdkafka#producer-5| [thrd:zeek_test_kafka_1:9092/bootstrap]: zeek_test_kafka_1:9092/bootstrap: Failed to resolve 'zeek_test_kafka_1:9092': Name or service not known (after 402653665ms in state INIT)
+%3|1612643021.995|ERROR|rdkafka#producer-5| [thrd:zeek_test_kafka_1:9092/bootstrap]: 1/1 brokers are down
+%3|1612643023.354|FAIL|rdkafka#producer-6| [thrd:zeek_test_kafka_1:9092/bootstrap]: zeek_test_kafka_1:9092/bootstrap: Failed to resolve 'zeek_test_kafka_1:9092': Name or service not known (after 402655024ms in state INIT)
+%3|1612643023.354|ERROR|rdkafka#producer-6| [thrd:zeek_test_kafka_1:9092/bootstrap]: zeek_test_kafka_1:9092/bootstrap: Failed to resolve 'zeek_test_kafka_1:9092': Name or service not known (after 402655024ms in state INIT)
+%3|1612643023.354|ERROR|rdkafka#producer-6| [thrd:zeek_test_kafka_1:9092/bootstrap]: 1/1 brokers are down
+%3|1612643031.396|FAIL|rdkafka#producer-7| [thrd:zeek_test_kafka_1:9092/bootstrap]: zeek_test_kafka_1:9092/bootstrap: Failed to resolve 'zeek_test_kafka_1:9092': Name or service not known (after 402663066ms in state INIT)
+%3|1612643031.396|ERROR|rdkafka#producer-7| [thrd:zeek_test_kafka_1:9092/bootstrap]: zeek_test_kafka_1:9092/bootstrap: Failed to resolve 'zeek_test_kafka_1:9092': Name or service not known (after 402663066ms in state INIT)
+%3|1612643031.396|ERROR|rdkafka#producer-7| [thrd:zeek_test_kafka_1:9092/bootstrap]: 1/1 brokers are down
+%3|1612643031.428|FAIL|rdkafka#producer-8| [thrd:zeek_test_kafka_1:9092/bootstrap]: zeek_test_kafka_1:9092/bootstrap: Failed to resolve 'zeek_test_kafka_1:9092': Name or service not known (after 402663098ms in state INIT)
+%3|1612643031.428|ERROR|rdkafka#producer-8| [thrd:zeek_test_kafka_1:9092/bootstrap]: zeek_test_kafka_1:9092/bootstrap: Failed to resolve 'zeek_test_kafka_1:9092': Name or service not known (after 402663098ms in state INIT)
+%3|1612643031.428|ERROR|rdkafka#producer-8| [thrd:zeek_test_kafka_1:9092/bootstrap]: 1/1 brokers are down

@@ -1,0 +1,9 @@
+#separator \x09
+#set_separator	,
+#empty_field	(empty)
+#unset_field	-
+#path	software
+#open	2021-02-06-20-00-32
+#fields	ts	host	host_p	software_type	name	version.major	version.minor	version.minor2	version.minor3	version.addl	unparsed_version
+#types	time	addr	port	enum	string	count	count	count	count	string	string
+1612641632.732010	192.168.178.124	-	HTTP::BROWSER	Firefox	85	0	-	-	-	Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:85.0) Gecko/20100101 Firefox/85.0

@@ -1,0 +1,14 @@
+#separator \x09
+#set_separator	,
+#empty_field	(empty)
+#unset_field	-
+#path	http
+#open	2021-02-06-20-00-32
+#fields	ts	uid	id.orig_h	id.orig_p	id.resp_h	id.resp_p	trans_depth	method	host	uri	referrer	version	user_agent	origin	request_body_len	response_body_len	status_code	status_msg	info_code	info_msg	tags	username	password	proxied	orig_fuids	orig_filenames	orig_mime_types	resp_fuids	resp_filenames	resp_mime_types
+#types	time	string	addr	port	addr	port	count	string	string	string	string	string	string	string	count	count	count	string	count	string	set[enum]	string	string	set[string]	vector[string]	vector[string]	vector[string]	vector[string]	vector[string]	vector[string]
+1612641632.721176	CrupsX1DPX9lSEVUb5	2001:16b8:407e:7e00:4956:3c56:9e87:9190	43548	2600:1901:0:38d7::	80	1	GET	detectportal.firefox.com	/success.txt	-	1.1	Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:85.0) Gecko/20100101 Firefox/85.0	-	0	8	200	OK	-	-	(empty)	-	-	-	-	-	-	FjKjsx3S1hEJe8gVX9	-	-
+1612641632.729242	CseYTu4qxsrK9DUtqe	2001:16b8:407e:7e00:4956:3c56:9e87:9190	43550	2600:1901:0:38d7::	80	1	GET	detectportal.firefox.com	/success.txt?ipv6	-	1.1	Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:85.0) Gecko/20100101 Firefox/85.0	-	0	8	200	OK	-	-	(empty)	-	-	-	-	-	-	FAHB2svavxPo8DmUi	-	-
+1612641632.732010	CfptgjyGAmdUJ2Ci5	192.168.178.124	43290	34.107.221.82	80	1	GET	detectportal.firefox.com	/success.txt?ipv4	-	1.1	Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:85.0) Gecko/20100101 Firefox/85.0	-	0	8	200	OK	-	-	(empty)	-	-	-	-	-	-	FAuCw41e4zWSA2mnEa	-	-
+1612641632.761601	CseYTu4qxsrK9DUtqe	2001:16b8:407e:7e00:4956:3c56:9e87:9190	43550	2600:1901:0:38d7::	80	2	GET	detectportal.firefox.com	/success.txt?ipv6	-	1.1	Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:85.0) Gecko/20100101 Firefox/85.0	-	0	8	200	OK	-	-	(empty)	-	-	-	-	-	-	F4cmYIq2x1IGt3iKk	-	-
+1612641632.837869	CF6nBF38xS9OJEGKZ4	192.168.178.124	43292	34.107.221.82	80	1	GET	detectportal.firefox.com	/success.txt?ipv4	-	1.1	Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:85.0) Gecko/20100101 Firefox/85.0	-	0	8	200	OK	-	-	(empty)	-	-	-	-	-	-	FOvyv62tm2p5NZNPk7	-	-
+1612641758.384075	CZCJlGLbqUiwfwZzl	192.168.178.124	52868	35.232.111.17	80	1	GET	connectivity-check.ubuntu.com	/	-	1.1	-	-	0	0	204	No Content	-	-	(empty)	-	-	-	-	-	-	-	-	-

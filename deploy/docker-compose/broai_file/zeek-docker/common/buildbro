@@ -1,0 +1,21 @@
+#!/bin/bash -e
+BRO=$1
+VER=$2
+BUILD_TYPE=${3-Release}
+
+URL=https://download.zeek.org/${BRO}-${VER}.tar.gz
+
+echo VER is $VER
+echo URL is $URL
+echo BUILD_TYPE is $BUILD_TYPE
+
+cd /usr/src/
+if [ ! -e ${BRO}-${VER}.tar.gz ] ; then 
+    wget -c $URL
+fi
+if [ ! -d ${BRO}-${VER} ]; then
+    tar xvzf ${BRO}-${VER}.tar.gz
+fi
+cd ${BRO}-${VER}
+./configure --prefix=/usr/local/${BRO}-${VER} --build-type="${BUILD_TYPE}"
+make -j $(nproc) install

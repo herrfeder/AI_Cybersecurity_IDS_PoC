@@ -14,14 +14,19 @@ services:
       context: zeek-docker
     volumes:
       - zeek_logs:/logs
+    environment:
+      KAFKA_HOST: 'broai_compose_kafka_1'
+      KAFKA_PORT: '9092'
+      KAFKA_TOPIC: 'zeek'
+
     network_mode: host
 
   broai:
     depends_on:
       - zeek
-    image: broai:latest
-    #build:
-    #  context: zeek-docker
+    build:
+      context: broai-docker
+      dockerfile: Dockerfile.file
     ports:
       - 8050:8050
     volumes:

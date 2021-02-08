@@ -19,11 +19,23 @@ if [ ! -f /zeek/etc/node.cfg ] || [ ! -s /zeek/etc/node.cfg ]; then
 	fi
 fi
 
+
+### set interface in node.cfg
 interfaces="$(ip link | awk -F: '$0 !~ "lo|vir|br-|docker|^[^0-9]"{print $2;getline}' | sed -z 's/\n/ /g;s/ $/\n/')"
 default_interface="$(ip route get 8.8.8.8 | awk '{print $5}' )"
 sed -i "s/^interface=eth0/interface='$default_interface'/" /zeek/etc/node.cfg 
 
-cat /zeek/etc/node.cfg
+### set environment variables into config files
+# KAFKA_TOPIC KAFKA_HOST KAFKA_PORT
+
+if [[ -z $KAFKA_TOPIC || -z $KAFKA_HOST || -z $KAFKA_PORT ]]; then
+  echo 'one or more variables are undefined'
+  exit 1
+fi
+
+sed -i "s/\$KAFKA_TOPIC/$KAFKA_TOPIC/" /zeek/share/zeek/site/local.zeek
+sed -i "s/\$KAFKA_HOST/$KAFKA_HOST/" /zeek/share/zeek/site/local.zeek
+sed -i "s/\$KAFKA_PORT/$KAFKA_PORT/" /zeek/share/zeek/site/local.zeek
 
 # do final log rotation
 stop() {

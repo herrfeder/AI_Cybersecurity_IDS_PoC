@@ -9,4 +9,24 @@ if [[ $1 == "file" ]]; then
     fi	
   cd $compose_folder
   docker-compose -f docker-compose.file.yml up
+
+
+elif [[ $1 == "kafka" ]]; then
+  if [[ ! -d "$compose_folder"/kafkafolder ]]
+    then
+      mkdir $compose_folder/kafkafolder
+    else
+      rm -r $compose_folder/kafkafolder
+      mkdir $compose_folder/kafkafolder
+    fi
+
+
+  export MY_IP_ADDRESS="$(hostname -I | awk '{print $1}')"
+  echo "This is the IP Address, Kafka Container will advertise: $MY_IP_ADDRESS" 
+  cd $compose_folder
+  docker-compose -f docker-compose.kafka.yml up
+
+else
+  echo -e "Please give \033[0;32mfile\033[0m or \033[0;31mkafka\033[0m as command line argument"
+  exit 1
 fi

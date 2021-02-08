@@ -103,8 +103,8 @@
 
 @load packages/metron-bro-plugin-kafka
 redef Kafka::send_all_active_logs = T;
-redef Kafka::topic_name = "zeek";
+redef Kafka::topic_name = "$KAFKA_TOPIC";
 redef Kafka::kafka_conf = table(
-    ["metadata.broker.list"] = "zeek_test_kafka_1:9092"
+    ["metadata.broker.list"] = "$KAFKA_HOST:$KAFKA_PORT"
 );
 

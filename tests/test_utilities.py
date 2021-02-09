@@ -1,13 +1,14 @@
 import pytest
-import sys 
-sys.path.append('..')
 import json
 from pygtail import Pygtail
 from io import StringIO
 import itertools
 import re
+import pandas
 
 
+import sys 
+sys.path.append('..')
 from app.utilities.parsezeeklogs import ParseZeekLogs
 import app.utilities.zeekheader as zeekheader
 from app.utilities.zeeklogreader import ZeekLogReader
@@ -41,7 +42,7 @@ class TestLogparsing(object):
 
         return pzl
 
-    # parsezeeklogs itself
+    # parsezeeklogs itself and expecting json output
     def test_read_parsezeeklogs(self):
         pzl = self.init_parse_zeek_logs(filepath=self.testlog_path)
 
@@ -51,7 +52,7 @@ class TestLogparsing(object):
                 assert log_record_json["ts"] != ""
 
 
-    # testing zeeklogreader
+    # testing zeeklogreader reading zeek conn.log to raw string from the beginning and expecting string output
     def test_read_raw_logs_start_fd(self):
         zlr = ZeekLogReader()
 
@@ -67,6 +68,7 @@ class TestLogparsing(object):
                 assert re.search("^[1-9][1-9]",log_record)
 
 
+    # testing zeeklogreader reading zeek conn.log to raw string from specific offset and expecting string output
     def test_read_raw_logs_offset_fd(self):
         zlr = ZeekLogReader()
 
@@ -77,3 +79,17 @@ class TestLogparsing(object):
             if log_record is not None:
                 print(log_record)
                 assert re.search("^[1-9][1-9]",log_record)
+
+
+    # testing zeeklogreader reading zeek conn.log to JSON from start
+    def test_read_logs_start_fd(self):
+        zlr = ZeekLogReader()
+
+        zlr_rl = zlr.read_logs(self.testlog_path, start=False)
+
+    
+        for log_record in zlr_rl:
+            if log_record is not None:
+                log_record_json = json.loads(log_record)
+                assert log_record_json["ts"] != ""
+

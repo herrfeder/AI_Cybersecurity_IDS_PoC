@@ -14,9 +14,9 @@ import matplotlib.pyplot as plt
 from sklearn.ensemble import IsolationForest
 
 try:
-    from app.utilities import zeeklogreader
+    from app.utilities import kafkalogreader
 except BaseException:
-    from utilities import zeeklogreader
+    from utilities import kafkalogreader
 try:
     from app.utilities import zeekheader
 except BaseException:
@@ -37,13 +37,15 @@ class IDSData():
     TODO: The dirty dirty dirty section needs proper functionality and no hardcoded strings
     '''
 
-    def __init__(self):
+    def __init__(self, file_test=False):
         self.base_path = pathlib.Path(__file__).parent.resolve()
 
-        self.zlr = zeeklogreader.ZeekLogReader()
-        self.data_read_f = {"conn": self.zlr.read_conn_logs,
+        self.klr = kafkalogreader.KafkaLogReader(file_test)
+        
+        self.data_read_k = {"conn": self.klr.read_conn_logs,
                             "dns": "",
                             "http": ""}
+
 
         self.data_h = {"conn": zeekheader.conn_fields,
                        "dns": "",
@@ -60,28 +62,29 @@ class IDSData():
         if not os.path.exists(self.model_path):
             os.mkdir(self.model_path)
 
-        # RANDOM FOREST
-        self.sup_conn_rf_path = os.path.join(
-            self.model_path, "RandomForestClassifier_HP_opti.joblib")
-        if not os.path.exists(self.sup_conn_rf_path):
-            print(
-                "You need to place the Model Files and Folders into the correct locations")
-            sys.exit()
+        if not file_test:
+            # RANDOM FOREST
+            self.sup_conn_rf_path = os.path.join(
+                self.model_path, "RandomForestClassifier_HP_opti.joblib")
+            if not os.path.exists(self.sup_conn_rf_path):
+                print(
+                    "You need to place the Model Files and Folders into the correct locations")
+                sys.exit()
 
-        self.sup_conn_rf_model = joblib.load(self.sup_conn_rf_path)
-        self.sup_conn_rf_cols = ['duration', 'orig_pkts',
-                                 'orig_ip_bytes', 'resp_pkts', 'resp_ip_bytes']
+            self.sup_conn_rf_model = joblib.load(self.sup_conn_rf_path)
+            self.sup_conn_rf_cols = ['duration', 'orig_pkts',
+                                    'orig_ip_bytes', 'resp_pkts', 'resp_ip_bytes']
 
-        # NEURAL NET
-        self.conn_nn_path = os.path.join(self.model_path, "nn_2_2")
-        if not os.path.exists(self.conn_nn_path):
-            print(
-                "You need to place the Model Files and Folders into the correct locations")
-            sys.exit()
+            # NEURAL NET
+            self.conn_nn_path = os.path.join(self.model_path, "nn_2_2")
+            if not os.path.exists(self.conn_nn_path):
+                print(
+                    "You need to place the Model Files and Folders into the correct locations")
+                sys.exit()
 
-        self.nn_conn_model = keras.models.load_model(self.conn_nn_path)
-        self.sup_conn_nn_cols = ['duration', 'orig_pkts',
-                                 'orig_ip_bytes', 'resp_pkts', 'resp_ip_bytes']
+            self.nn_conn_model = keras.models.load_model(self.conn_nn_path)
+            self.sup_conn_nn_cols = ['duration', 'orig_pkts',
+                                    'orig_ip_bytes', 'resp_pkts', 'resp_ip_bytes']
 
         # CACHES
         # DataFrame Cache

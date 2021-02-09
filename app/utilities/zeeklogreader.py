@@ -15,7 +15,7 @@ except BaseException:
 
 class ZeekLogReader():
 
-    def __init__(self, logoffsets="logoffsets"):
+    def __init__(self, logoffsets="logoffsets", file_test=False):
         self.base_path = pathlib.Path(__file__).parent.resolve()
         self.offset_path = os.path.join(self.base_path, "logoffsets")
         if not os.path.exists(self.offset_path):
@@ -23,11 +23,15 @@ class ZeekLogReader():
         self.tmp_path = os.path.join(self.base_path, "logtemp")
         if not os.path.exists(self.tmp_path):
             os.mkdir(self.tmp_path)
-        self.log_path_prefix = os.path.join(
-            self.base_path, "../../../zeek_input")
+        
+        if not file_test:
+            self.log_path_prefix = os.path.join(
+                self.base_path, "../../../zeek_input")
 
-        self.conn_log_file = "conn.log"
-        self.conn_log = os.path.join(self.log_path_prefix, self.conn_log_file)
+            self.conn_log_file = "conn.log"
+            self.conn_log = os.path.join(self.log_path_prefix, self.conn_log_file)
+        else:
+            self.conn_log = "../tests/testdata/conn.log"
 
         # Define these fields for conn.log format
         # It's necessary to read Zeek.logs not from the beginning without
@@ -55,10 +59,12 @@ class ZeekLogReader():
                 if line is not None:
                     yield line
 
+
     def return_conn_timestamp(self):
         str_line_time = linecache.getline(self.conn_log, 6)
         timestamp = str_line_time.split("\t")[1].strip()
         return timestamp
+
 
     def read_logs(self, log_file="", start=False):
         if log_file:
@@ -82,6 +88,7 @@ class ZeekLogReader():
                     unset_field=self.unset_field):
                 if log_record is not None:
                     yield log_record
+
 
     def read_conn_logs(self, init_offset=""):
         output_json = []

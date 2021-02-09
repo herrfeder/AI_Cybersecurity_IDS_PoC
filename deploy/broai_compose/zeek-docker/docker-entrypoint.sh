@@ -30,7 +30,8 @@ sed -i "s/^interface=eth0/interface='$default_interface'/" /zeek/etc/node.cfg
 
 if [[ -z $KAFKA_TOPIC || -z $KAFKA_HOST || -z $KAFKA_PORT ]]; then
   echo 'one or more variables are undefined'
-  exit 1
+  echo 'Initialiaze as empty'
+  export KAFKA_TOPIC=" "; export KAFKA_HOST=" "; export KAFKA_PORT=" "
 fi
 
 sed -i "s/\$KAFKA_TOPIC/$KAFKA_TOPIC/" /zeek/share/zeek/site/local.zeek

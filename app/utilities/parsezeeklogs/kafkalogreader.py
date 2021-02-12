@@ -1,15 +1,8 @@
-try:
-    from app.utilities.parsezeeklogs import ParseZeekLogs
-except BaseException:
-    from utilities.parsezeeklogs import ParseZeekLogs
-from pygtail import Pygtail
-import pathlib
 import os
 import sys
 from kafka import KafkaConsumer
+import json
 
-import linecache
-from io import StringIO
 try:
     import app.utilities.zeekheader as zeekheader
 except BaseException:
@@ -51,30 +44,20 @@ class KafkaLogReader():
         self.consumer.subscribe(pattern=self.kafka["topics"])
 
 
-    def read_logs(self, log_file="", start=False):
+    def read_logs(self):
        
-        for log_line in self.consumer:
-            log_record = json.loads(log_line)
+        for message in self.consumer:
+            log_record = json.loads(message.value)
             yield log_record
 
 
-    def read_conn_logs(self, init_offset=""):
+    def read_conn_logs(self):
         output_json = []
-        if not init_offset:
-            for line in self.read_logs(self.conn_log, start=True):
-                output_json.append(line)
-        return output_json
-
-    def update_conn_logs(self):
-        output_json = []
-        for line in self.read_logs(self.conn_log, start=False):
+        for line in self.read_logs():
             output_json.append(line)
         return output_json
 
-    def update_all_logs(self):
-        self.read_logs(self.conn_log)
-
 
 if __name__ == "__main__":
-    zlr = ZeekLogReader()
-    zlr.update_all_logs()
+    klr = KafkaLogReader()
+    klr.read_logs()

@@ -51,9 +51,6 @@ class IDSData():
                        "dns": "",
                        "http": ""}
 
-        self.data_upd_f = {"conn": self.zlr.update_conn_logs,
-                           "dns": "",
-                           "http": ""}
 
         self.df_d = {"conn": pd.DataFrame(),
                      "temp": ""}
@@ -108,11 +105,8 @@ class IDSData():
     ########################
     ###### LOGPARSING ######
     ########################
-    def parse_json_to_pandas(self, file_type="", update=False):
-        if not update:
-            json_input = "\n".join(self.data_read_f[file_type]())
-        else:
-            json_input = "\n".join(self.data_upd_f[file_type]())
+    def parse_json_to_pandas(self, file_type=""):
+        json_input = "\n".join(self.data_read_k[file_type]())
         return pd.read_json(json_input, lines=True)
 
     def read_pickle_to_pandas(self, file_type=""):
@@ -137,16 +131,6 @@ class IDSData():
                 self.predict_conn_sup_rf(file_type)
                 self.save_pandas_to_pickle(file_type)
 
-    def update_source(self, file_type=""):
-        if file_type in self.data_upd_f.keys():
-            if not self.df_d[file_type].empty:
-                self.df_d["temp"] = self.parse_json_to_pandas(
-                    file_type, update=True)
-                self.convert_zeek_df("temp")
-                self.predict_conn_sup_rf("temp")
-                self.predict_conn_nn("temp")
-                self.df_d[file_type] = self.df_d[file_type].append(
-                    self.df_d["temp"])
 
     ########################
     ###### PREDICTION ######

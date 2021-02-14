@@ -2,6 +2,7 @@ import os
 import sys
 from kafka import KafkaConsumer
 import json
+import multiprocessing
 
 try:
     import app.utilities.zeekheader as zeekheader
@@ -30,11 +31,14 @@ class KafkaLogReader():
                 temp_topics = "|".join([x.strip() for x in self.kafka["topics"].split(",")])
                 self.kafka["topics"] = temp_topics
 
-
         self.init_consumer()
-
         self.conn_fields = zeekheader.conn_fields
         self.conn_types = zeekheader.conn_types
+
+        self.mp_manager = multiprocessing.Manager()
+        self.return_list = self.mp_manager.list()
+        
+        self.read_process = multiprocessing.Process(target=self.read_logs)
 
 
     def init_consumer(self):
@@ -49,7 +53,8 @@ class KafkaLogReader():
         for message in self.consumer:
             log_record = json.loads(message.value)
             print(log_record)
-            yield log_record
+            self.return_list.append(log_record)
+
 
 
     def read_conn_logs(self):

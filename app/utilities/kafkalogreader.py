@@ -48,6 +48,7 @@ class KafkaLogReader():
        
         for message in self.consumer:
             log_record = json.loads(message.value)
+            print(log_record)
             yield log_record
 
 

@@ -95,7 +95,7 @@ class IDSData():
         else:
             self.latlon_cache = {}
 
-        self.conn_timestamp = self.zlr.return_conn_timestamp()
+        #self.conn_timestamp = self.klr.return_conn_timestamp()
 
         # dirty dirty dirty SECTION
 

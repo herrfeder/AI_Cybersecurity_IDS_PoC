@@ -9,6 +9,10 @@ try:
 except BaseException:
     import utilities.zeekheader as zeekheader
 
+def pop_all(l):
+    r, l[:] = l[:], []
+    return r
+
 
 class KafkaLogReader():
 
@@ -43,7 +47,6 @@ class KafkaLogReader():
 
     def init_consumer(self):
 
-        # To consume latest messages and auto-commit offsets
         self.consumer = KafkaConsumer(bootstrap_servers=[self.kafka["host"]+":"+self.kafka["port"]])
         self.consumer.subscribe(pattern=self.kafka["topics"])
 
@@ -51,16 +54,16 @@ class KafkaLogReader():
     def read_logs(self):
        
         for message in self.consumer:
-            log_record = json.loads(message.value)
-            print(log_record)
-            self.return_list.append(log_record)
+            try:
+                log_record = json.loads(message.value)
+                self.return_list.append(log_record)
+            except:
+                pass
 
 
 
-    def read_conn_logs(self):
-        output_json = []
-        for line in self.read_logs():
-            output_json.append(line)
+    def get_conn_logs(self):
+        output_json = pop_all(self.return_list)
         return output_json
 
 

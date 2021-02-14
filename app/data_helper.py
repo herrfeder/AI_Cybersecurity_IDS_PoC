@@ -42,7 +42,7 @@ class IDSData():
 
         self.klr = kafkalogreader.KafkaLogReader(file_test)
         
-        self.data_read_k = {"conn": self.klr.read_conn_logs,
+        self.data_read_k = {"conn": self.klr.get_conn_logs,
                             "dns": "",
                             "http": ""}
 

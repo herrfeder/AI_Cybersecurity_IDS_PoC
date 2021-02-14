@@ -413,7 +413,7 @@ server = app.server
                Input('anomaly_span_dropdown', 'value'),
                Input('anomaly_submit', 'n_clicks')])
 def return_anomaly(counter_value, span_value, anomaly_click):
-    dh.update_source("conn")
+    dh.read_source("conn")
 
     return return_anomaly_model(
         file_type="conn", train_offset=span_value, counter_offset=counter_value)
@@ -424,7 +424,7 @@ def return_anomaly(counter_value, span_value, anomaly_click):
 @app.callback(Output('apply_data_table', 'children'),
               [Input('apply_update', 'n_intervals'), ])
 def update_apply_data(n_intervals):
-    dh.update_source("conn")
+    dh.read_source("conn")
 
     return return_apply_table()
 
@@ -438,7 +438,7 @@ def update_apply_data(n_intervals):
               [Input('table_update', 'n_intervals'),
                Input('monitor_time_dropdown', 'value')])
 def update_monitor_table(n_intervals, monitor_time_interval):
-    dh.update_source("conn")
+    dh.read_source("conn")
     return (return_data_table("conn", timespan=monitor_time_interval),
             return_ip_bar_chart("conn", timespan=monitor_time_interval),
             return_ip_bar_dest_chart("conn", timespan=monitor_time_interval),

@@ -121,7 +121,7 @@ class IDSData():
                     os.path.join(self.df_cache_path, file_type + ".p"))
 
     def read_source(self, file_type="", read_pickle=True):
-        if file_type in self.data_read_f.keys():
+        if file_type in self.data_read_k.keys():
             if os.path.exists(os.path.join(self.df_cache_path,
                                            file_type + ".p")) and read_pickle:
                 self.df_d[file_type] = self.read_pickle_to_pandas(file_type)

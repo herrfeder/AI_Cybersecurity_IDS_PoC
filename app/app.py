@@ -28,7 +28,7 @@ APP_PATH = pathlib.Path(__file__).parent.resolve()
 
 
 dh = dh.IDSData()
-dh.read_source("conn")
+#dh.read_source("conn")
 # dh.update_source("conn")
 
 

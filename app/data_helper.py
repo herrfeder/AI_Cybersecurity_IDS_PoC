@@ -129,9 +129,11 @@ class IDSData():
     def read_source(self, file_type="", read_pickle=True):
         if file_type in self.data_read_k.keys():
             self.df_d["temp"] = self.parse_dict_to_pandas(file_type)
-            self.convert_zeek_df("temp")
-            self.predict_conn_sup_rf("temp")
-            self.predict_conn_nn("temp")
+
+            if not self.df_d["temp"].empty:
+                self.convert_zeek_df("temp")
+                self.predict_conn_sup_rf("temp")
+                self.predict_conn_nn("temp")
 
             self.append_temp_to_df(file_type)
             self.save_pandas_to_pickle(file_type)
@@ -215,6 +217,7 @@ class IDSData():
 
         return prediction
 
+
     ########################
     ###### WRANGLING #######
     ########################
@@ -230,13 +233,11 @@ class IDSData():
     
     def append_temp_to_df(self, file_type=""):
         self.df_d[file_type] = self.df_d[file_type].append(self.df_d["temp"])
-        print(self.df_d[file_type].columns)
 
 
     def convert_iso_time(self, file_type=""):
-        if "ts" in self.df_d[file_type].columns:
-            if not isinstance(self.df_d[file_type]["ts"][0], pd.Timestamp) :
-                self.df_d[file_type].loc[:,'ts'] = self.df_d[file_type]['ts'].apply(lambda x: datetime.datetime.strptime(x,"%Y-%m-%dT%H:%M:%S.%fZ"))
+        if not isinstance(self.df_d[file_type]["ts"][0], pd.Timestamp):
+            self.df_d[file_type].loc[:,'ts'] = self.df_d[file_type]['ts'].apply(lambda x: datetime.datetime.strptime(x,"%Y-%m-%dT%H:%M:%S.%fZ"))
 
 
     def convert_epoch_ts(self, file_type=""):
@@ -245,10 +246,8 @@ class IDSData():
                 round(self.df_d[file_type]["ts"]), unit="s") + pd.DateOffset(hours=1)
 
     def sort_set_index(self, file_type=""):
-        print(self.df_d[file_type].columns)
-        print(self.df_d[file_type].head(5))
-        self.df_d[file_type] = self.df_d[file_type].sort_values("ts").set_index("ts")
-        self.df_d[file_type]["Time"] = self.df_d[file_type].index
+            self.df_d[file_type] = self.df_d[file_type].sort_values("ts").set_index("ts")
+            self.df_d[file_type]["Time"] = self.df_d[file_type].index
 
     def drop_unused_conn_fields(self, file_type):
         self.df_d[file_type].drop("uid", errors="ignore", inplace=True)
@@ -279,10 +278,9 @@ class IDSData():
     ###########################
 
     def get_timespan_df(self, file_type, time_offset):
-        time_delta = self.df_d[file_type].index.max(
-        ) - datetime.timedelta(seconds=time_offset)
-
+        time_delta = self.df_d[file_type].index.max() - datetime.timedelta(seconds=time_offset)
         return self.df_d[file_type][self.df_d[file_type].index > time_delta]
+
 
     def get_lonlat_from_ip(self, ip):
         if (lonlat_t := self.latlon_cache.get(ip)):
@@ -303,6 +301,7 @@ class IDSData():
             else:
                 self.latlon_cache[ip] = (0, 0)
                 return (0, 0)
+
 
     def get_ten_most_source_ip(self, file_type, time_offset):
         df = self.get_timespan_df(file_type, time_offset * 60)

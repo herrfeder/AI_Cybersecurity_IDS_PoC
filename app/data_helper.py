@@ -44,7 +44,8 @@ class IDSData():
         
         self.data_read_k = {"conn": self.klr.get_conn_logs,
                             "dns": "",
-                            "http": ""}
+                            "http": "",
+                            "temp": ""}
 
 
         self.data_h = {"conn": zeekheader.conn_fields,

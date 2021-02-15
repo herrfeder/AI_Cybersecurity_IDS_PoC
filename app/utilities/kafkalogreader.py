@@ -43,6 +43,7 @@ class KafkaLogReader():
         self.return_list = self.mp_manager.list()
         
         self.read_process = multiprocessing.Process(target=self.read_logs)
+        self.read_process.start()
 
 
     def init_consumer(self):

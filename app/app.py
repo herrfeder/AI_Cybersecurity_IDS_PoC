@@ -213,6 +213,8 @@ def return_apply_table():
 
     plot_df = df.tail(99)
     print(plot_df.shape)
+    print(pred)
+    print(len(pred))
     plot_df["Prediction_AD"] = pred
     return ph.plot_prediction_table(plot_df, fig="", title="")
 

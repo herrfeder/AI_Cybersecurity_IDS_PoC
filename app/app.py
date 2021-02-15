@@ -8,6 +8,7 @@ import pandas as pd
 import flask
 import dash
 import dash_table
+import os
 import dash_core_components as dcc
 import dash_html_components as html
 import dash_bootstrap_components as dbc
@@ -28,8 +29,12 @@ APP_PATH = pathlib.Path(__file__).parent.resolve()
 
 
 dh = dh.IDSData()
-#dh.read_source("conn")
-# dh.update_source("conn")
+
+project_branch = os.environ["PROJECT_BRANCH"]
+if project_branch.endswith("green"):
+    project_color = "green"
+elif project_branch.endswith("blue"):
+    project_color = "blue"
 
 
 # Lists for Project Menu and associated Icons
@@ -116,7 +121,9 @@ NAVBAR = dbc.Navbar(
                                             height="40px"), href="https://www.bwi.de"), width=2),
                 dbc.Col(dbc.NavbarBrand(dbc.Row([
                         html.P("BroAI", style={"color": "#FF0000"}),
-                        html.P("(KI - Cyber Security)", style={"color": "orange"})], align="center")), width=7),
+                        html.P("(KI - Cyber Security)", style={"color": "orange"}),
+                        html.P("  "),
+                        html.P("Deployment: "+project_branch, style={"color": project_color})], align="center")), width=7),
 
                 dbc.Col(dbc.DropdownMenu(
                         children=[

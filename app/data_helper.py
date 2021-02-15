@@ -125,14 +125,10 @@ class IDSData():
 
     def read_source(self, file_type="", read_pickle=True):
         if file_type in self.data_read_k.keys():
-            if os.path.exists(os.path.join(self.df_cache_path,
-                                           file_type + ".p")) and read_pickle:
-                self.df_d[file_type] = self.read_pickle_to_pandas(file_type)
-            else:
-                self.df_d[file_type] = self.parse_dict_to_pandas(file_type)
-                self.convert_zeek_df(file_type)
-                self.predict_conn_sup_rf(file_type)
-                self.save_pandas_to_pickle(file_type)
+            self.df_d[file_type] = self.parse_dict_to_pandas(file_type)
+            self.convert_zeek_df(file_type)
+            self.predict_conn_sup_rf(file_type)
+            self.save_pandas_to_pickle(file_type)
 
 
     ########################

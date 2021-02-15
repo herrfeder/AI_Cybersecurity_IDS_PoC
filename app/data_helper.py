@@ -228,9 +228,9 @@ class IDSData():
 
 
     def convert_iso_time(self, file_type=""):
-        
-        if not "ts" in self.df_d[file_type].columns:
-            self.df_d[file_type].loc[:,'ts'] = self.df_d[file_type]['ts'].apply(lambda x: datetime.datetime.strptime(x,"%Y-%m-%dT%H:%M:%S.%fZ"))
+        if "ts" in self.df_d[file_type].columns:
+            if not isinstance(self.df_d[file_type]["ts"][0], pd.Timestamp) :
+                self.df_d[file_type].loc[:,'ts'] = self.df_d[file_type]['ts'].apply(lambda x: datetime.datetime.strptime(x,"%Y-%m-%dT%H:%M:%S.%fZ"))
 
 
     def convert_epoch_ts(self, file_type=""):

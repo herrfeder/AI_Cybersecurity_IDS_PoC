@@ -103,6 +103,7 @@ class IDSData():
         # Blacklist IPs should be an functionality in the web app
         self.blacklist_ips = ["94.102.49.191"]
 
+
     ########################
     ###### LOGPARSING ######
     ########################
@@ -129,6 +130,7 @@ class IDSData():
             self.df_d["temp"] = self.parse_dict_to_pandas(file_type)
             self.convert_zeek_df("temp")
             self.predict_conn_sup_rf("temp")
+            self.predict_conn_nn("temp")
 
             self.append_temp_to_df(file_type)
             self.save_pandas_to_pickle(file_type)

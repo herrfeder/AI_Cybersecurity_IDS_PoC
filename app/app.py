@@ -122,7 +122,7 @@ NAVBAR = dbc.Navbar(
                 dbc.Col(dbc.NavbarBrand(dbc.Row([
                         html.P("BroAI", style={"color": "#FF0000"}),
                         html.P("(KI - Cyber Security)", style={"color": "orange"}),
-                        html.P("  "),
+                        html.P("", style={"margin-left": "15px"}),
                         html.P("Deployment: "+project_branch, style={"color": project_color})], align="center")), width=7),
 
                 dbc.Col(dbc.DropdownMenu(

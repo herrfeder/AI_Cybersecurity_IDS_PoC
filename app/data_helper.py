@@ -143,10 +143,12 @@ class IDSData():
             self.df_d[file_type][self.sup_conn_rf_cols])
         self.df_d[file_type]["Prediction_rf"] = results
 
+
     def predict_conn_nn(self, file_type=""):
         results = self.nn_conn_model.predict(
             self.df_d[file_type][self.sup_conn_rf_cols])
         self.df_d[file_type]["Prediction_nn"] = results
+
 
     def train_anomaly_detection(
             self, file_type="", train_offset=24, counter_offset=900):
@@ -225,6 +227,7 @@ class IDSData():
     
     def append_temp_to_df(self, file_type=""):
         self.df_d[file_type] = self.df_d[file_type].append(self.df_d["temp"])
+        print(self.df_d[file_type].columns)
 
 
     def convert_iso_time(self, file_type=""):

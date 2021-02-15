@@ -109,6 +109,9 @@ class IDSData():
         json_input = "\n".join(self.data_read_k[file_type]())
         return pd.read_json(json_input, lines=True)
 
+    def parse_dict_to_pandas(self, file_type=""):
+        return pd.DataFrame(self.data_read_k[file_type]())
+
     def read_pickle_to_pandas(self, file_type=""):
         if file_type:
             return pd.read_pickle(os.path.join(
@@ -126,7 +129,7 @@ class IDSData():
                                            file_type + ".p")) and read_pickle:
                 self.df_d[file_type] = self.read_pickle_to_pandas(file_type)
             else:
-                self.df_d[file_type] = self.parse_json_to_pandas(file_type)
+                self.df_d[file_type] = self.parse_dict_to_pandas(file_type)
                 self.convert_zeek_df(file_type)
                 self.predict_conn_sup_rf(file_type)
                 self.save_pandas_to_pickle(file_type)

@@ -217,7 +217,6 @@ class IDSData():
 
     def convert_zeek_df(self, file_type=""):
         self.convert_iso_time(file_type)
-        self.convert_(file_type)
         self.sort_set_index(file_type)
         self.drop_unused_conn_fields(file_type)
         self.fill_nan_values(file_type)
@@ -226,7 +225,7 @@ class IDSData():
 
     def convert_iso_time(self, file_type=""):
         if not isinstance(self.df_d[file_type]["ts"][0], pd.Timestamp):
-            self.df_d[file_type].loc[:,'ts'] = self.df_d[file_type]['ts'].apply(lambda x: pd.datetools.parse(x).strftime('%Y-%m-%dT%H:%M%:%SZ'))
+            self.df_d[file_type].loc[:,'ts'] = self.df_d[file_type]['ts'].apply(lambda x: pd.to_datetime(x, format='%Y-%m-%dT%H:%M%:%SZ', errors=ignore))
 
     def convert_epoch_ts(self, file_type=""):
         if not isinstance(self.df_d[file_type]["ts"][0], pd.Timestamp):

@@ -138,7 +138,7 @@ def plot_data_table(df, fig="", title=""):
 
     plot_df = df[["Time", "id.orig_h", "id.orig_p",
                   "id.resp_h", "id.resp_p", "proto",
-                  "service", "orig_ip_bytes", "resp_ip_bytes",
+                  "history", "orig_ip_bytes", "resp_ip_bytes",
                   "duration", "orig_bytes", "resp_bytes"]]
 
     dt = dash_table.DataTable(

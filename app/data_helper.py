@@ -219,9 +219,11 @@ class IDSData():
         self.clean_duration(file_type)
         self.remove_ips(file_type)
 
+
     def convert_iso_time(self, file_type=""):
         if not isinstance(self.df_d[file_type]["ts"][0], pd.Timestamp):
             self.df_d[file_type].loc[:,'ts'] = self.df_d[file_type]['ts'].apply(lambda x: datetime.datetime.strptime(x,"%Y-%m-%dT%H:%M:%S.%fZ"))
+
 
     def convert_epoch_ts(self, file_type=""):
         if not isinstance(self.df_d[file_type]["ts"][0], pd.Timestamp):

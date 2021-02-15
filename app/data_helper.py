@@ -53,7 +53,7 @@ class IDSData():
 
 
         self.df_d = {"conn": pd.DataFrame(),
-                     "temp": ""}
+                     "temp": pd.DataFrame()}
 
         self.model_path = os.path.join(self.base_path, "models")
         if not os.path.exists(self.model_path):
@@ -125,9 +125,11 @@ class IDSData():
 
     def read_source(self, file_type="", read_pickle=True):
         if file_type in self.data_read_k.keys():
-            self.df_d[file_type] = self.parse_dict_to_pandas(file_type)
-            self.convert_zeek_df(file_type)
-            self.predict_conn_sup_rf(file_type)
+            self.df_d["temp"] = self.parse_dict_to_pandas(file_type)
+            self.convert_zeek_df("temp")
+            self.predict_conn_sup_rf("temp")
+            
+            self.append_temp_to_df(file_type)
             self.save_pandas_to_pickle(file_type)
 
 
@@ -218,6 +220,10 @@ class IDSData():
         self.fill_nan_values(file_type)
         self.clean_duration(file_type)
         self.remove_ips(file_type)
+
+    
+    def append_temp_to_df(self, file_type=""):
+        self.df_d[file_type] = self.df_d[file_type].append(self.df_d["temp"])
 
 
     def convert_iso_time(self, file_type=""):

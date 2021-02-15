@@ -128,7 +128,7 @@ class IDSData():
             self.df_d["temp"] = self.parse_dict_to_pandas(file_type)
             self.convert_zeek_df("temp")
             self.predict_conn_sup_rf("temp")
-            
+
             self.append_temp_to_df(file_type)
             self.save_pandas_to_pickle(file_type)
 
@@ -227,7 +227,8 @@ class IDSData():
 
 
     def convert_iso_time(self, file_type=""):
-        if not isinstance(self.df_d[file_type]["ts"][0], pd.Timestamp):
+        
+        if not "ts" in self.df_d[file_type].columns:
             self.df_d[file_type].loc[:,'ts'] = self.df_d[file_type]['ts'].apply(lambda x: datetime.datetime.strptime(x,"%Y-%m-%dT%H:%M:%S.%fZ"))
 
 

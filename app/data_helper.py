@@ -216,12 +216,17 @@ class IDSData():
     ########################
 
     def convert_zeek_df(self, file_type=""):
-        self.convert_epoch_ts(file_type)
+        self.convert_iso_time(file_type)
+        self.convert_(file_type)
         self.sort_set_index(file_type)
         self.drop_unused_conn_fields(file_type)
         self.fill_nan_values(file_type)
         self.clean_duration(file_type)
         self.remove_ips(file_type)
+
+    def convert_iso_time(self, file_type=""):
+        if not isinstance(self.df_d[file_type]["ts"][0], pd.Timestamp):
+            self.df_d[file_type].loc[:,'ts'] = self.df_d[file_type]['ts'].apply(lambda x: pd.datetools.parse(x).strftime('%Y-%m-%dT%H:%M%:%SZ'))
 
     def convert_epoch_ts(self, file_type=""):
         if not isinstance(self.df_d[file_type]["ts"][0], pd.Timestamp):
@@ -244,6 +249,9 @@ class IDSData():
         self.df_d[file_type].fillna("", inplace=True)
 
     def clean_duration(self, file_type=""):
+        if not "duration" in self.df_d[file_type].columns:
+            self.df_d[file_type]["duration"] = 0.0
+
         self.df_d[file_type]["duration"] = [0.0 if isinstance(
             x, str) else x for x in self.df_d[file_type]["duration"]]
 

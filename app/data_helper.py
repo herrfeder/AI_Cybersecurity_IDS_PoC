@@ -125,6 +125,7 @@ class IDSData():
                 self.df_d[file_type].to_pickle(
                     os.path.join(self.df_cache_path, file_type + ".p"))
 
+
     def read_source(self, file_type="", read_pickle=True):
         if file_type in self.data_read_k.keys():
             self.df_d["temp"] = self.parse_dict_to_pandas(file_type)
@@ -244,8 +245,9 @@ class IDSData():
                 round(self.df_d[file_type]["ts"]), unit="s") + pd.DateOffset(hours=1)
 
     def sort_set_index(self, file_type=""):
-        self.df_d[file_type] = self.df_d[file_type].sort_values(
-            "ts").set_index("ts")
+        print(self.df_d[file_type].columns)
+        print(self.df_d[file_type].head(5))
+        self.df_d[file_type] = self.df_d[file_type].sort_values("ts").set_index("ts")
         self.df_d[file_type]["Time"] = self.df_d[file_type].index
 
     def drop_unused_conn_fields(self, file_type):

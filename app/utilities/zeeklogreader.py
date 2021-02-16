@@ -55,10 +55,12 @@ class ZeekLogReader():
                 if line is not None:
                     yield line
 
+
     def return_conn_timestamp(self):
         str_line_time = linecache.getline(self.conn_log, 6)
         timestamp = str_line_time.split("\t")[1].strip()
         return timestamp
+
 
     def read_logs(self, log_file="", start=False):
         if log_file:

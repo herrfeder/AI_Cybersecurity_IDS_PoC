@@ -38,6 +38,13 @@ sed -i "s/\$KAFKA_TOPIC/$KAFKA_TOPIC/" /zeek/share/zeek/site/local.zeek
 sed -i "s/\$KAFKA_HOST/$KAFKA_HOST/" /zeek/share/zeek/site/local.zeek
 sed -i "s/\$KAFKA_PORT/$KAFKA_PORT/" /zeek/share/zeek/site/local.zeek
 
+### set timezone
+
+ln -snf /usr/share/zoneinfo/$TZ /etc/localtime
+echo $TZ > /etc/timezone
+
+
+
 # do final log rotation
 stop() {
 	echo "Stopping zeek..."

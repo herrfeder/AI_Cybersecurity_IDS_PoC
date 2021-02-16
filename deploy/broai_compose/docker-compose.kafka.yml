@@ -4,10 +4,12 @@ services:
     build:
       context: zeek-docker
     environment:
-      KAFKA_HOST: 'broai_compose_kafka_1'
+      KAFKA_HOST: ${MY_IP_ADDRESS}
       KAFKA_PORT: '9092'
       KAFKA_TOPIC: 'zeek'
-  
+      TZ: 'Europe/Berlin'
+    network_mode: host
+
   zookeeper:
     image: wurstmeister/zookeeper
     ports:
@@ -32,8 +34,10 @@ services:
       - zeek
       - zookeeper
       - kafka
-    image: broai:latest
+    build:
+      context: broai-docker
     environment:
+      PROJECT_BRANCH: 'david_udacity_project_blue'
       KAFKA_HOST: 'broai_compose_kafka_1'
       KAFKA_PORT: '9092'
       KAFKA_TOPIC: 'zeek'

@@ -102,7 +102,8 @@
 # @load policy/protocols/conn/mac-logging
 
 @load packages/metron-bro-plugin-kafka
-redef Kafka::send_all_active_logs = T;
+redef Kafka::logs_to_send = set(Conn::LOG);
+redef Kafka::json_timestamps = JSON::TS_ISO8601;
 redef Kafka::topic_name = "$KAFKA_TOPIC";
 redef Kafka::kafka_conf = table(
     ["metadata.broker.list"] = "$KAFKA_HOST:$KAFKA_PORT"

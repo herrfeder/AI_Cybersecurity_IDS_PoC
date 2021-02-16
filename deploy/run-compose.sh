@@ -3,18 +3,29 @@
 compose_folder="broai_compose"
 
 if [[ $1 == "file" ]]; then
+  if [[ $2 == "build" ]]; then
+    cd $compose_folder
+    docker-compose -f docker-compose.file.yml build
+  fi
+  
   if [[ ! -d "$compose_folder"/zeeklogs ]]
     then
       mkdir $compose_folder/zeeklogs
     else
       rm -r $compose_folder/zeeklogs
       mkdir $compose_folder/zeeklogs      
-    fi	
+  fi	
   cd $compose_folder
   docker-compose -f docker-compose.file.yml up
 
 
 elif [[ $1 == "kafka" ]]; then
+  if [[ $2 == "build" ]]; then
+    cd $compose_folder
+    docker-compose -f docker-compose.kafka.yml build
+    cd ..
+  fi   
+  
   if [[ ! -d "$compose_folder"/kafkafolder ]]
     then
       mkdir $compose_folder/kafkafolder
@@ -27,6 +38,7 @@ elif [[ $1 == "kafka" ]]; then
   export MY_IP_ADDRESS="$(hostname -I | awk '{print $1}')"
   echo "This is the IP Address, Kafka Container will advertise: $MY_IP_ADDRESS" 
   cd $compose_folder
+  docker-compose -f docker-compose.kafka.yml down
   docker-compose -f docker-compose.kafka.yml up
 
 else

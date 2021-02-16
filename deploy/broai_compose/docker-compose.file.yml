@@ -1,0 +1,29 @@
+version: '3.7'
+
+volumes:
+  zeek_logs:
+    driver: local
+    driver_opts:
+      type: none
+      device: ${PWD}/zeeklogs
+      o: bind
+
+services:
+  zeek:
+    build:
+      context: zeek-docker
+    volumes:
+      - zeek_logs:/logs
+
+    network_mode: host
+
+  broai:
+    depends_on:
+      - zeek
+    build:
+      context: broai-docker
+      dockerfile: Dockerfile.file
+    ports:
+      - 8050:8050
+    volumes:
+      - zeek_logs:/home/datascientist/zeek_input

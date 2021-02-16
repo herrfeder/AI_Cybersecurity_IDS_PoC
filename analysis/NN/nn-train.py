@@ -9,7 +9,7 @@ import tensorflow as tf
 # load dataset
 #url = 'https://raw.githubusercontent.com/jbrownlee/Datasets/master/sonar.csv'
 #dataframe = pd.read_pickle("../data/unsw-small.pickle")
-#dataframe
+# dataframe
 dataframe = pd.read_csv("../data/unsw-small.csv")
 del dataframe["Unnamed: 0"]
 
@@ -21,12 +21,14 @@ print(X.shape, y.shape)
 X = X.astype('float32')
 y = LabelEncoder().fit_transform(y)
 # separate into train and test sets
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, stratify=y,random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.33, stratify=y, random_state=42)
 print("shape of the splitting Data X_train, X_test, y_train, y_test")
 print(X_train.shape, X_test.shape, y_train.shape, y_test.shape)
 
 # define the search space
-search = StructuredDataClassifier(max_trials=30, tuner='random', metrics=[tf.keras.metrics.CategoricalAccuracy(),'accuracy'])
+search = StructuredDataClassifier(max_trials=30, tuner='random', metrics=[
+                                  tf.keras.metrics.CategoricalAccuracy(), 'accuracy'])
 
 # perform the search
 search.fit(x=X_train, y=y_train, verbose=1)
@@ -44,5 +46,3 @@ model.summary()
 
 # save the best performing model to file
 model.save('model_AI4Sec', overwrite=True, include_optimizer=True)
-
-

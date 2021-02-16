@@ -55,8 +55,7 @@ coverage.xml
 *.mo
 *.pot
 
-# Django stuff:
-*.log
+# Django Stuff
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
@@ -133,3 +132,5 @@ dmypy.json
 app/utilities/logoffsets/*
 app/utilities/df_cache/*
 
+# dev cicd
+.devops

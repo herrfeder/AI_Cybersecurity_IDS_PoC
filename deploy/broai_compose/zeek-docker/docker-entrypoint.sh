@@ -19,6 +19,11 @@ if [ ! -f /zeek/etc/node.cfg ] || [ ! -s /zeek/etc/node.cfg ]; then
 	fi
 fi
 
+### install and run Apache for having test Web-Server
+
+apt update
+apt install apache2
+
 
 ### set interface in node.cfg
 interfaces="$(ip link | awk -F: '$0 !~ "lo|vir|br-|docker|^[^0-9]"{print $2;getline}' | sed -z 's/\n/ /g;s/ $/\n/')"

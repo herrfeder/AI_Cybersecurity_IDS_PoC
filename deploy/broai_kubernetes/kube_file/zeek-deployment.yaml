@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose -f ../../broai_compose/docker-compose.file.yml convert
+    kompose.version: 1.22.0 (955b78124)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: zeek
+  name: zeek
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: zeek
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose -f ../../broai_compose/docker-compose.file.yml convert
+        kompose.version: 1.22.0 (955b78124)
+      creationTimestamp: null
+      labels:
+        io.kompose.service: zeek
+    spec:
+      containers:
+        - image: herrfeder/zeek_kafka:latest
+          name: zeek
+          ports:
+            - containerPort: 80 
+          resources: {}
+          volumeMounts:
+            - mountPath: /logs
+              name: zeek-logs
+      restartPolicy: Always
+      volumes:
+        - name: zeek-logs
+          persistentVolumeClaim:
+            claimName: zeek-logs
+status: {}

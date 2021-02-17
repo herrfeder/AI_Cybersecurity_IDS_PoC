@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose -f ../../broai_compose/docker-compose.file.yml convert
+    kompose.version: 1.22.0 (955b78124)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: broai
+  name: broai
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: broai
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose -f ../../broai_compose/docker-compose.file.yml convert
+        kompose.version: 1.22.0 (955b78124)
+      creationTimestamp: null
+      labels:
+        io.kompose.service: broai
+    spec:
+      containers:
+        - env:
+            - name: PROJECT_BRANCH
+              value: david_udacity_project_green
+          image: herrfeder/broai:latest
+          name: broai
+          ports:
+            - containerPort: 8050
+          resources: {}
+          volumeMounts:
+            - mountPath: /home/datascientist/zeek_input
+              name: zeek-logs
+      restartPolicy: Always
+      volumes:
+        - name: zeek-logs
+          persistentVolumeClaim:
+            claimName: zeek-logs
+status: {}

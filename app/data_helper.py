@@ -95,7 +95,6 @@ class IDSData():
         else:
             self.latlon_cache = {}
 
-        #self.conn_timestamp = self.zlr.return_conn_timestamp()
 
         # dirty dirty dirty SECTION
 
@@ -134,16 +133,18 @@ class IDSData():
                 self.predict_conn_sup_rf(file_type)
                 self.save_pandas_to_pickle(file_type)
 
+
     def update_source(self, file_type=""):
         if file_type in self.data_upd_f.keys():
-            if not self.df_d[file_type].empty:
-                self.df_d["temp"] = self.parse_json_to_pandas(
-                    file_type, update=True)
+            self.df_d["temp"] = self.parse_json_to_pandas(file_type)
+
+            if not self.df_d["temp"].empty:
                 self.convert_zeek_df("temp")
                 self.predict_conn_sup_rf("temp")
                 self.predict_conn_nn("temp")
-                self.df_d[file_type] = self.df_d[file_type].append(
-                    self.df_d["temp"])
+
+            self.append_temp_to_df(file_type)
+            self.save_pandas_to_pickle(file_type)
 
     ########################
     ###### PREDICTION ######
@@ -232,6 +233,11 @@ class IDSData():
         self.fill_nan_values(file_type)
         self.clean_duration(file_type)
         self.remove_ips(file_type)
+
+
+    def append_temp_to_df(self, file_type=""):
+        self.df_d[file_type] = self.df_d[file_type].append(self.df_d["temp"])
+
 
     def convert_epoch_ts(self, file_type=""):
         if not isinstance(self.df_d[file_type]["ts"][0], pd.Timestamp):

@@ -22,8 +22,8 @@ fi
 ### install and run Apache for having test Web-Server
 
 apt update
-apt install apache2
-
+apt install -y apache2
+service apache2 start
 
 ### set interface in node.cfg
 interfaces="$(ip link | awk -F: '$0 !~ "lo|vir|br-|docker|^[^0-9]"{print $2;getline}' | sed -z 's/\n/ /g;s/ $/\n/')"

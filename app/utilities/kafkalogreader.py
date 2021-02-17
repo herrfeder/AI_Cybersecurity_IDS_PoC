@@ -66,6 +66,8 @@ class KafkaLogReader():
 
     def get_conn_logs(self):
         output_json = pop_all(self.return_list)
+        print("Output JSON:")
+        print(output_json)
         return output_json
 
 

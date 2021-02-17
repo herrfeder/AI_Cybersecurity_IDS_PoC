@@ -279,7 +279,7 @@ class IDSData():
 
     def get_timespan_df(self, file_type, time_offset):
         print(self.df_d[file_type].index.max())
-        print(type(self.df_d[file_type].index[0]))
+        print(self.df_d[file_type])
         time_delta = self.df_d[file_type].index.max() - datetime.timedelta(seconds=time_offset)
         return self.df_d[file_type][self.df_d[file_type].index > time_delta]
 

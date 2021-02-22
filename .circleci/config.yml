@@ -86,7 +86,7 @@ jobs:
           name: Create Virtual Env and source Env
           command: |
             make setup
-            echo "source /path/to/virtualenv/bin/activate" >> $BASH_ENV
+            echo "source .devops/bin/activate" >> $BASH_ENV
       - run:
           name: Install app and dev dependencies
           command: |

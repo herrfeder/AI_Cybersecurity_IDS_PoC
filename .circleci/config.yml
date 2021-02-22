@@ -3,7 +3,7 @@ version: 2.1
 executors:
   python:
     docker:
-      - image: cimg/python:3.9.1
+      - image: cimg/python:3.8.0
   aws:
     docker: 
       - image: amazon/aws-cli
@@ -79,10 +79,9 @@ jobs:
       - checkout
       - attach_workspace:
           at: .
-      - run:
-          name: Resetting bash environment
-          command: |
-            echo "" > $BASH_ENV
+      - restore_cache:
+          keys: 
+            - python-env-01
       - run:
           name: Create Virtual Env and source Env
           command: |
@@ -94,6 +93,11 @@ jobs:
             pip3 -V
             ls .devops/lib/python3.9/site-packages/
             make devinstall
+
+      - save_cache:
+          paths: 
+            - .devops
+          key: python-env-01
       - persist_to_workspace:
           root: .
           paths:

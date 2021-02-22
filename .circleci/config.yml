@@ -205,7 +205,6 @@ workflows:
       - scan-app:
           requires: [prepare-env-app]
       - lint-dockerfiles
-          requires: [prepare
       - build-upload-container:
           requires: [lint-dockerfiles]
           context:

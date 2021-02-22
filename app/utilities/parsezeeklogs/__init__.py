@@ -4,6 +4,7 @@ from datetime import datetime
 from traceback import print_exc
 import sys
 
+
 class ParseZeekLogs(object):
     """Class that parses Zeek logs and allows log data to be output in CSV or json format.
 
@@ -21,7 +22,7 @@ class ParseZeekLogs(object):
         elif fd:
             self.fd = fd
         else:
-	        sys.exit(1)
+            sys.exit(1)
 
         self.options = OrderedDict()
         self.firstRun = True
@@ -88,7 +89,7 @@ class ParseZeekLogs(object):
 
     def __del__(self):
         if hasattr(self, 'fd'):
-            self.fd.close() 
+            self.fd.close()
         else:
             sys.exit(1)
 

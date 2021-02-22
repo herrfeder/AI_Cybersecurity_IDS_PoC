@@ -24,6 +24,7 @@ elif [[ $1 == "kafka" ]]; then
     cd $compose_folder
     docker-compose -f docker-compose.kafka.yml build
     cd ..
+    exit 0
   fi   
   
   if [[ ! -d "$compose_folder"/kafkafolder ]]

@@ -17,8 +17,8 @@ class TestLogparsing(object):
 
     @pytest.fixture(autouse=True) 
     def _setup(self):
-        self.testlog_path = "testdata/conn.log"
-        self.offset_path = "testdata/log_offset"
+        self.testlog_path = "tests/testdata/conn.log"
+        self.offset_path = "tests/testdata/log_offset"
         self.conn_fields = zeekheader.conn_fields
         self.conn_types = zeekheader.conn_types
         self.seperator = '\t'

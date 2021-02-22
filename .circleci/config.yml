@@ -7,6 +7,9 @@ executors:
   aws:
     docker: 
       - image: amazon/aws-cli
+  dockerexe:
+    docker:
+      - image: circleci/docker
 
 
 commands:
@@ -15,70 +18,35 @@ commands:
     steps:  
       - run:
           name: Install dependencies
-          command: yum install -y tar gzip curl
+           command: yum install -y tar gzip curl
 
-  run-nodejs-scan:
-    description: Run generic nodejs source code and dependency scanning
-    parameters:
-      workingdir:
-        default: "."
-        type: string
+  source-venv:
+     description: source the python virtual environment
     steps:
-      - run:
-          name: Update npm 
-          working_directory: "<< parameters.workingdir >>"
-          command: npm update
-      - run:
-          name: Scanning the source defined in workingdir against npm audit
-          working_directory: "<< parameters.workingdir >>"
-          command: npm audit fix --audit-level=critical --force
-
-  run-nodejs-tests:
-    description: Run generic nodejs source code testing
-    parameters:
-      workingdir:
-        default: "."
-        type: string
-    steps:
-      - run:
-          name: Generic testing of the javascript source with jest defined in working_directory
-          working_directory: "<< parameters.workingdir >>"
-          command: npm run test --ci
-
+       - run:
+          name: Source existing environment
+           command: source .devops/bin/activate
 
   destroy-environment:
-    description: Destroy back-end and front-end cloudformation stacks using CIRCE_WORKFLOW_ID.
+     description: Destroy AWS EKS resources with specific CIRCE_WORKFLOW_ID.
     parameters:
-      when:
+       when:
         type: string
     steps:
      - run:
-        name: Check existence of aws cli and install it
+         name: Check existence of aws cli and install it
         command: sh scripts/check_aws.sh
         when: << parameters.when >>
      - run:
         name: Destroy backend
-        command: aws cloudformation delete-stack --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}"
-        when: << parameters.when >>
+        command: aws cloudformation delete-stack --stack-name "udapeople-pods-${CIRCLE_WORKFLOW_ID:0:7}"
+         when: << parameters.when >>
      - run:
-        name: Destroy frontend
+         name: Destroy frontend
         command: |
           aws s3 rm s3://udapeople-s3-${CIRCLE_WORKFLOW_ID:0:7} --recursive
           aws cloudformation delete-stack --stack-name "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}"
         when: << parameters.when >>
-     - run:
-        name: Destroy logging
-        command: |
-          aws cloudformation delete-stack --stack-name "udapeople-logging-${CIRCLE_WORKFLOW_ID:0:7}"
-        when: << parameters.when >>
-     - run:
-        name: Destroy cloudfront
-        command: |
-          aws cloudformation delete-stack --stack-name "udapeople-cloudfront-${CIRCLE_WORKFLOW_ID:0:7}"
-        when: << parameters.when >>
-
-
-
 
   revert-migrations:
     description: Revert the last migration if successfully run in the current workflow.
@@ -101,55 +69,130 @@ commands:
               npm run migrations:revert
             fi
           when: << parameters.when >>            
+
 jobs:
 
-  #######################
-  #### C INTEGRATION ####
-  #######################
-
-  ###### BUILDING #######
-
-  build-frontend:
-    executor: node
+  prepare-env-app:
+    executor: python
     steps:
       - checkout
+      - attach_workspace:
+          at: .
+            - run:
+          name: Create Virtual Env and source Env
+          command: |
+            make setup
       - run:
-          name: Install frontend dependencies
-          working_directory: ./frontend
-          command: npm install
-      - run:
-          name: Build front-end with npm run build
-          working_directory: ./frontend
-          command: npm run build
-      - save_cache:
-          paths: 
-            - frontend/node_modules
-          key: frontend-build-${CIRCLE_WORKFLOW_ID:0:6}
-
-  build-backend:
-    executor: node
-    steps:
-      - checkout
-      - run:
-          name: Install backend dependencies
-          working_directory: ./backend
-          command: npm install
-      - run:
-          name: Build Backend with npm run build
-          working_directory: ./backend
-          command: npm run build
-      - save_cache:
-          paths:
-            - backend/node_modules
-            - backend/dist
-          key: backend-build-${CIRCLE_WORKFLOW_ID:0:7}
+          name: Install app and dev dependencies
+          command: |
+            make devinstall
       - persist_to_workspace:
           root: .
           paths:
-            - backend/node_modules
-            - backend/dist
+            - .devops
+
+  lint-app:
+    executor: python
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - source-venv
+      - run:
+          name: Linting Green Deployment Source
+          command: |
+            make sourcelint
 
 
+  test-static-app:
+    executor: python
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - source-venv
+      - run:
+          name: Linting Green Deployment Source
+          command: |
+            make test
+
+  scan-app:
+    executor: python
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - source-venv
+      - run:
+          name: Scanning Green Deployment Source
+          command: |
+            make staticscan
+
+  lint-dockerfiles:
+    executor: python
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - source-venv
+      - run:
+          name: Linting Dockerfiles for broai and zeek container
+          command: |
+            make dockerlint
+
+  build-upload-container:
+    executor: python
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - source-venv
+      - run:
+          name: Linting Dockerfiles for broai and zeek container
+          command: |
+            deploy/run_compose.sh kafka build
+            deploy/upload_docker.sh
+
+
+
+  cleanup:
+    executor: aws
+    steps:
+      - checkout
+      - aws-install-dependencies
+      - run:
+          name: Get current stack workflow id
+          command: |
+            export CurrentWorkflowID=$(aws cloudformation \
+              list-exports --query "Exports[?Name==\`WorkflowID\`].Value" \
+              --no-paginate --output text)
+            export STACKS=($(aws cloudformation list-stacks --query "StackSummaries[*].StackName" \
+              --stack-status-filter CREATE_COMPLETE --no-paginate --output text))
+            export S3_BUCKETS=($(aws s3 ls | cut -d" " -f3)) 
+            
+            echo "${S3_BUCKETS[@]}"
+            echo "${STACKS[@]}"
+            echo "$CurrentWorkflowID"
+ 
+      - run:
+          name: Remove old stacks and files
+          command: |
+            # empty all S3 Buckets that aren't tagged with current WorkflowID
+            for s3 in ${S3_BUCKETS[@]}; do 
+              if [[ ! "$s3" =~ "$CurrentWorkflowID" ]]; 
+                then
+                  echo "Removing Bucket $s3"
+                  aws s3 rm "s3://$s3" --recursive
+              fi
+            done
+            # delete all stacks that aren't tagged with current WorkflowID
+            for stack in ${STACKS[@]}; do 
+              if [[ ! "$stack" =~ "${CurrentWorkflowID}" ]]
+                then
+                  echo "Removing Stack $stack"
+                  aws cloudformation delete-stack --stack-name "$stack"
+                fi
+            done
             
 workflows:
   default:
@@ -157,59 +200,54 @@ workflows:
       - prepare-env-app
       - lint-app:
           requires: [prepare-env-app]
-          context:
-            - udacity_clouddevops_capstone
       - test-static-app:
           requires: [prepare-env-app]
-          context:
-            - udacity_clouddevops_capstone
       - scan-app:
           requires: [prepare-env-app]
-          context:
-            - udacity_clouddevops_capstone
       - lint-dockerfiles
+          requires: [prepare
       - build-upload-container:
           requires: [lint-dockerfiles]
           context:
-            - dockerhub 
-      - prep-infrastructure-green-aws:
-          requires: [lint-app, test-static-app, scan-app]
+            - dockerhub   
+      #- prep-infrastructure-green-aws:
+      #    requires: [lint-app, test-static-app, scan-app]
+      #    context:
+      #      - aws_vars
+      #    filters:
+      #      branches:
+      #        only:
+      #           - main 
+      #- deploy-infrastructure-green:
+      #    requires: [prep-infrastructure-blue-green-aws]
+      #    context:
+      #      - aws_vars
+      #    filters:
+      #      branches:
+      #        only:
+      #            - master
+      #- deploy-infrastructure-blue:
+      #    requires: [prep-infrastructure-blue-green-aws]
+      #    context:
+      #      - aws_vars
+      #    filters:
+      #      branches:
+      #        only:
+      #            - master
+      #- smoke-test-green-blue:
+      #    requires: [deploy-infrastructure-green, deploy-infrastructure-blue]
+      #- test-dynamic-app-blue:
+      #    requires: [smoke-test-green-blue]
+      #    context:
+      #      - aws_vars
+      #       - udacity_devops_project3
+      #- loadbalancer-update:
+      #    requires:  [smoke-test]
+      #    context:
+      #      - aws_vars
+      #       - udacity_d evops_project3
+      #- cleanup:
+      #    requires: [loadbalancer-update]
           context:
-            - aws_vars
-          filters:
-            branches:
-              only:
-                - main
-      - deploy-infrastructure-green:
-          requires: [prep-infrastructure-blue-green-aws]
-          context:
-            - aws_vars
-          filters:
-            branches:
-              only:
-                - master
-      - deploy-infrastructure-blue:
-          requires: [prep-infrastructure-blue-green-aws]
-          context:
-            - aws_vars
-          filters:
-            branches:
-              only:
-                - master
-      - test-dynamic-app-blue:
-        requires: [deploy-infrastructure-blue]
-      - smoke-test:
-          requires: [deploy-backend, deploy-01-frontend, deploy-02-frontend]
-          context:
-            - aws_vars
-            - udacity_devops_project3
-      - cloudfront-update:
-          requires: [smoke-test]
-          context:
-            - aws_vars
-            - udacity_devops_project3
-      - cleanup:
-          requires: [cloudfront-update]
-          context:
-            - aws_vars
+            - aws_vars 
             - udacity_devops_project3

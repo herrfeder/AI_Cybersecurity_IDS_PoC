@@ -1,9 +1,16 @@
 #!/usr/bin/env bash
 
-read -rp 'Please enter your DockerHub username: ' USERNAME
-echo ""
-read -rsp 'Please enter your DockerHub password: ' PASSWORD
-echo ""
+if [ -z "$CIRCLECI_DOCKERHUB_USER" ];
+	read -rp 'Please enter your DockerHub username: ' USERNAME
+else
+	USERNAME="$CIRCLECI_DOCKERHUB_USER"
+fi
+
+if [ -z "$CIRCLECI_DOCKERHUB_PASS" ];
+	read -rsp 'Please enter your DockerHub password: ' PASSWORD
+else
+	PASSWORD="$CIRCLECI_DOCKERHUB_PASS"
+fi
 
 # Create dockerpaths
 dockerpath_broai=$USERNAME/broai:latest

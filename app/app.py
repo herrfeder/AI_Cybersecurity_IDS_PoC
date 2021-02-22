@@ -122,9 +122,12 @@ NAVBAR = dbc.Navbar(
                                             height="40px"), href="https://www.bwi.de"), width=2),
                 dbc.Col(dbc.NavbarBrand(dbc.Row([
                         html.P("BroAI", style={"color": "#FF0000"}),
-                        html.P("(KI - Cyber Security)", style={"color": "orange"}),
+                        html.P(
+                            "(KI - Cyber Security)",
+                            style={
+                                "color": "orange"}),
                         html.P("", style={"margin-left": "15px"}),
-                        html.P("Deployment: "+project_branch, style={"color": project_color})], align="center")), width=7),
+                        html.P("Deployment: " + project_branch, style={"color": project_color})], align="center")), width=7),
 
                 dbc.Col(dbc.DropdownMenu(
                         children=[

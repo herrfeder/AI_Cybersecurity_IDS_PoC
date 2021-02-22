@@ -2,3 +2,4 @@ bandit
 pylint
 pytest
 safety
+autopep8

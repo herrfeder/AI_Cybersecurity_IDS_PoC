@@ -20,6 +20,9 @@ devinstall:
 	.circleci/scripts/install_requirements.sh
 
 
+statictest:
+	python -m pytest -vv tests/*.py
+
 staticscan:
 	bandit -r ./app -lll
 

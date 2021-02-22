@@ -91,6 +91,7 @@ jobs:
           name: Install app and dev dependencies
           command: |
             make devinstall
+            ls .devops/lib/python3.9/site-packages/
       - persist_to_workspace:
           root: .
           paths:
@@ -101,10 +102,12 @@ jobs:
     steps:
       - checkout
       - attach_workspace:
-          at: .
+          at: . 
       - run:
           name: Linting Green Deployment Source
           command: |
+            pip -V
+            ls .devops/lib/python3.9/site-packages/
             make sourcelint
 
 
@@ -117,7 +120,7 @@ jobs:
       - run:
           name: Linting Green Deployment Source
           command: |
-            make test
+            make statictest
 
   scan-app:
     executor: python

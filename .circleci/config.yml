@@ -3,7 +3,7 @@ version: 2.1
 executors:
   python:
     docker:
-      - image: python:3.9.0-alpine
+      - image: cimg/python:3.9.1
   aws:
     docker: 
       - image: amazon/aws-cli
@@ -204,7 +204,8 @@ workflows:
           requires: [prepare-env-app]
       - scan-app:
           requires: [prepare-env-app]
-      - lint-dockerfiles
+      - lint-dockerfiles:
+          requires: [prepare-env-app]
       - build-upload-container:
           requires: [lint-dockerfiles]
           context:

@@ -18,14 +18,14 @@ commands:
     steps:  
       - run:
           name: Install dependencies
-           command: yum install -y tar gzip curl
+          command: yum install -y tar gzip curl
 
   source-venv:
      description: source the python virtual environment
     steps:
        - run:
           name: Source existing environment
-           command: source .devops/bin/activate
+          command: source .devops/bin/activate
 
   destroy-environment:
      description: Destroy AWS EKS resources with specific CIRCE_WORKFLOW_ID.
@@ -35,18 +35,18 @@ commands:
     steps:
      - run:
          name: Check existence of aws cli and install it
-        command: sh scripts/check_aws.sh
-        when: << parameters.when >>
+         command: sh scripts/check_aws.sh
+         when: << parameters.when >>
      - run:
-        name: Destroy backend
-        command: aws cloudformation delete-stack --stack-name "udapeople-pods-${CIRCLE_WORKFLOW_ID:0:7}"
+         name: Destroy backend
+         command: aws cloudformation delete-stack --stack-name "udapeople-pods-${CIRCLE_WORKFLOW_ID:0:7}"
          when: << parameters.when >>
      - run:
          name: Destroy frontend
-        command: |
-          aws s3 rm s3://udapeople-s3-${CIRCLE_WORKFLOW_ID:0:7} --recursive
-          aws cloudformation delete-stack --stack-name "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}"
-        when: << parameters.when >>
+         command: |
+           aws s3 rm s3://udapeople-s3-${CIRCLE_WORKFLOW_ID:0:7} --recursive
+           aws cloudformation delete-stack --stack-name "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}"
+         when: << parameters.when >>
 
   revert-migrations:
     description: Revert the last migration if successfully run in the current workflow.
@@ -141,7 +141,7 @@ jobs:
             make dockerlint
 
   build-upload-container:
-    executor: python
+    executor: dockerexe
     steps:
       - checkout
       - attach_workspace:

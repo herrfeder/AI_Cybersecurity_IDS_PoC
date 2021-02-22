@@ -33,7 +33,7 @@ dynamicscan:
 
 sourcelint:
 	autopep8 --aggressive --in-place --recursive -v app/
-	find app -name '*.py' -print0 | xargs -I '{}' -0 pylint --disable=E1101 '{}'
+	find app -name '*.py' -print0 | xargs -I '{}' -0 pylint -E --disable=E1101 '{}'
 
 
 dockerlint:

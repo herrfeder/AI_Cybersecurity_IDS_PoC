@@ -9,7 +9,7 @@ executors:
       - image: amazon/aws-cli
   dockerexe:
     docker:
-      - image: circleci/docker
+      - image: bayesimpact/circleci
 
 
 commands:

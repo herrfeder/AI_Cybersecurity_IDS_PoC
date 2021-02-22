@@ -8,3 +8,4 @@ then
 	chmod +x .devops/hadolint
 else
 	echo "Please run first 'make setup'"
+fi

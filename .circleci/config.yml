@@ -21,14 +21,14 @@ commands:
           command: yum install -y tar gzip curl
 
   source-venv:
-     description: source the python virtual environment
+    description: source the python virtual environment
     steps:
        - run:
           name: Source existing environment
           command: source .devops/bin/activate
 
   destroy-environment:
-     description: Destroy AWS EKS resources with specific CIRCE_WORKFLOW_ID.
+    description: Destroy AWS EKS resources with specific CIRCE_WORKFLOW_ID.
     parameters:
        when:
         type: string

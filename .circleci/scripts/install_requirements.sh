@@ -1,5 +1,5 @@
 
-if [ ! -z $( pip3 -V | grep "/.devops/") ] 
+if [[ ! -z $( pip3 -V | grep "/.devops/") ]] 
 then
 	pip3 install -r requirements.txt
 	pip3 install -r dev-requirements.txt

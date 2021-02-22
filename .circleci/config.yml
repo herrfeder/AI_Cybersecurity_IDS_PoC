@@ -79,10 +79,14 @@ jobs:
       - attach_workspace:
           at: .
       - run:
+          name: Resetting bash environment
+          command: |
+            echo "" > $BASH_ENV
+      - run:
           name: Create Virtual Env and source Env
           command: |
             make setup
-      - source-venv
+            echo "source /path/to/virtualenv/bin/activate" >> $BASH_ENV
       - run:
           name: Install app and dev dependencies
           command: |
@@ -98,7 +102,6 @@ jobs:
       - checkout
       - attach_workspace:
           at: .
-      - source-venv
       - run:
           name: Linting Green Deployment Source
           command: |
@@ -111,7 +114,6 @@ jobs:
       - checkout
       - attach_workspace:
           at: .
-      - source-venv
       - run:
           name: Linting Green Deployment Source
           command: |
@@ -123,7 +125,6 @@ jobs:
       - checkout
       - attach_workspace:
           at: .
-      - source-venv
       - run:
           name: Scanning Green Deployment Source
           command: |
@@ -135,7 +136,6 @@ jobs:
       - checkout
       - attach_workspace:
           at: .
-      - source-venv
       - run:
           name: Linting Dockerfiles for broai and zeek container
           command: |
@@ -147,7 +147,6 @@ jobs:
       - checkout
       - attach_workspace:
           at: .
-      - source-venv
       - run:
           name: Linting Dockerfiles for broai and zeek container
           command: |

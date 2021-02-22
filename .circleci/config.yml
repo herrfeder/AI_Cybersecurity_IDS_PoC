@@ -160,7 +160,7 @@ jobs:
       - run:
           name: Linting Dockerfiles for broai and zeek container
           command: |
-            deploy/run_compose.sh kafka build
+            make buildcontainer
             deploy/upload_docker.sh
 
 

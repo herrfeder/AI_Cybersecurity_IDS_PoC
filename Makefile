@@ -20,6 +20,10 @@ devinstall:
 	.circleci/scripts/install_requirements.sh
 
 
+buildcontainer:
+	deploy/run_compose.sh kafka build
+
+
 statictest:
 	python -m pytest -vv tests/*.py
 

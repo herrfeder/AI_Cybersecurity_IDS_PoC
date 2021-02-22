@@ -1,6 +1,6 @@
 #!/bin/bash
 
-compose_folder="broai_compose"
+compose_folder="deploy/broai_compose"
 
 if [[ $1 == "file" ]]; then
   if [[ $2 == "build" ]]; then

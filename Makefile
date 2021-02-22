@@ -14,19 +14,11 @@ setup:
 
 
 install:
-	if [[ ! -z $( pip3 -V | grep "/.devops/" ) ]]; then
-	  pip3 install -r requirements.txt
-	else
-	  echo "Make sure to run 'make install' first"
-	fi
+	pip3 install -r requirements.txt
 
 
 devinstall:
-	if [[ ! -z $( pip3 -V | grep "/.devops/" ) ]]; then
-	  .circleci/scripts/install_requirements.sh
-	else
-	  echo "Make sure to run 'make install' first"
-	fi
+	.circleci/scripts/install_requirements.sh
 
 
 staticscan:
@@ -43,7 +35,6 @@ sourcelint:
 
 
 dockerlint:
-	IGNORE="--ignore DL3008 --ignore DL3013"
 	.devops/hadolint --ignore DL3008 --ignore DL3013 deploy/broai_compose/broai-docker/Dockerfile
 	.devops/hadolint --ignore DL3008 --ignore DL3013 deploy/broai_compose/zeek-docker/Dockerfile
 

@@ -247,6 +247,6 @@ workflows:
       #       - udacity_d evops_project3
       #- cleanup:
       #    requires: [loadbalancer-update]
-          context:
-            - aws_vars 
-            - udacity_devops_project3
+      #    context:
+      #      - aws_vars 
+      #      - udacity_devops_project3

@@ -42,7 +42,7 @@ ARG ZEEK_VER=3.2.0
 #install runtime dependencies and dependencies for zkg and metron-kafka-plugin
 RUN apt-get update \
     && apt-get -y install --no-install-recommends libpcap0.8 libssl1.1 libmaxminddb0 python3.7-minimal \
-    && apt-get -y install --no-install-recommends git python3-pip cmake librdkafka-dev libssl-dev libpcap-dev \
+    && apt-get -y install --no-install-recommends git build-essential python3-pip python3-setuptools cmake librdkafka-dev libssl-dev libpcap-dev \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 
@@ -61,7 +61,6 @@ RUN ln -s /usr/local/zeek-${ZEEK_VER} /zeek
 ENV PATH /zeek/bin/:$PATH
 
 RUN pip3 install --no-cache-dir zkg
-#COPY ./config/zkg_config /root/.zkg/config
 RUN zkg autoconfig
 RUN zkg install --force --skiptests apache/metron-bro-plugin-kafka --version master
 

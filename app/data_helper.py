@@ -260,6 +260,9 @@ class IDSData():
         self.df_d[file_type].fillna("", inplace=True)
 
     def clean_duration(self, file_type=""):
+        if not "duration" in self.df_d[file_type].columns:
+            self.df_d[file_type]["duration"] = 0.0
+
         self.df_d[file_type]["duration"] = [0.0 if isinstance(
             x, str) else x for x in self.df_d[file_type]["duration"]]
 

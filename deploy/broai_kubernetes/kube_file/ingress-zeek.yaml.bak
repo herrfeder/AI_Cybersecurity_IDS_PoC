@@ -1,8 +1,0 @@
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: ingress-zeek
-spec:
-  backend:
-    serviceName: zeek
-    servicePort: 80

@@ -7,15 +7,15 @@ metadata:
   creationTimestamp: null
   labels:
     io.kompose.service: broai
-  name: broai
+  name: broai-green
 spec:
   ports:
     - name: "8050"
       port: 8050
       targetPort: 8050
-  externalIPs:
+  externalIPs: 
     - {{EXTERNAL_IP}}
   selector:
-    io.kompose.service: broai
+    io.kompose.service: broai-green
 status:
   loadBalancer: {}

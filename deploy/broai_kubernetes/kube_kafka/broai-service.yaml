@@ -6,16 +6,16 @@ metadata:
     kompose.version: 1.22.0 (955b78124)
   creationTimestamp: null
   labels:
-    io.kompose.service: broai
-  name: broai
+    io.kompose.service: broai-blue
+  name: broai-blue
 spec:
   ports:
     - name: "8050"
-      port: 8050
+      port: 8051
       targetPort: 8050
   externalIPs: 
     - {{EXTERNAL_IP}}
   selector:
-    io.kompose.service: broai
+    io.kompose.service: broai-blue
 status:
   loadBalancer: {}

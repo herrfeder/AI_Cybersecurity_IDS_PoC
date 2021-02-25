@@ -6,13 +6,13 @@ metadata:
     kompose.version: 1.22.0 (955b78124)
   creationTimestamp: null
   labels:
-    io.kompose.service: broai
-  name: broai
+    io.kompose.service: broai-blue
+  name: broai-blue
 spec:
   replicas: 1
   selector:
     matchLabels:
-      io.kompose.service: broai
+      io.kompose.service: broai-blue
   strategy: {}
   template:
     metadata:
@@ -21,7 +21,7 @@ spec:
         kompose.version: 1.22.0 (955b78124)
       creationTimestamp: null
       labels:
-        io.kompose.service: broai
+        io.kompose.service: broai-blue
     spec:
       containers:
         - env:

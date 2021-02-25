@@ -6,16 +6,16 @@ metadata:
     kompose.version: 1.22.0 (955b78124)
   creationTimestamp: null
   labels:
-    io.kompose.service: zeek
-  name: zeek
+    io.kompose.service: zeek-blue
+  name: zeek-blue
 spec:
   ports:
     - name: "80"
-      port: 80
+      port: 8889
       targetPort: 80
   externalIPs: 
     - {{EXTERNAL_IP}}
   selector:
-    io.kompose.service: zeek
+    io.kompose.service: zeek-blue
 status:
   loadBalancer: {}

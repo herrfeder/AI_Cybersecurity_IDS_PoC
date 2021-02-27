@@ -1,0 +1,66 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: loadbalancer-main
+  labels:
+    app: loadbalancer-main
+spec:
+  type: LoadBalancer
+  selector:
+    app: broai-blue
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8050
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: loadbalancer-dev
+  labels:
+    app: loadbalancer-dev
+spec:
+  type: LoadBalancer
+  selector:
+    app: broai-green
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8050
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: loadbalancer-zeek-web-main
+  labels:
+    app: loadbalancer-zeek-web-main
+spec:
+  type: LoadBalancer
+  selector:
+    app: zeek-blue
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: loadbalancer-zeek-web-dev
+  labels:
+    app: loadbalancer-zeek-web-dev
+spec:
+  type: LoadBalancer
+  selector:
+    app: zeek-green
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+

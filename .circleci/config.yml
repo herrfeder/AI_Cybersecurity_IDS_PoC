@@ -217,26 +217,34 @@ workflows:
           requires: [prepare-env-app]
       - lint-dockerfiles:
           requires: [prepare-env-app]
+          filters:
+            branches:
+              only:
+                - main 
       - build-upload-container:
           requires: [lint-dockerfiles]
           context:
-            - dockerhub   
-      #- prep-infrastructure-green-aws:
-      #    requires: [lint-app, test-static-app, scan-app]
-      #    context:
-      #      - aws_vars
-      #    filters:
-      #      branches:
-      #        only:
-      #           - main 
-      #- deploy-infrastructure-green:
-      #    requires: [prep-infrastructure-blue-green-aws]
-      #    context:
-      #      - aws_vars
-      #    filters:
-      #      branches:
-      #        only:
-      #            - master
+            - dockerhub
+          filters:
+            branches:
+              only:
+                - main 
+      - prep-infrastructure-aws:
+          requires: [lint-app, test-static-app, scan-app, build-upload-container]
+          context:
+            - aws_vars
+          filters:
+            branches:
+              only:
+                - main 
+      - deploy-k8-infrastructure:
+          requires: [prep-infrastructure-aws]
+          context:
+            - aws_vars
+          filters:
+            branches:
+              only:
+                - main
       #- deploy-infrastructure-blue:
       #    requires: [prep-infrastructure-blue-green-aws]
       #    context:

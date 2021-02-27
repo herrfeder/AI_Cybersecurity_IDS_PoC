@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: broai-green
+  name: broai-green
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: broai-green
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: broai-green
+    spec:
+      containers:
+        - env:
+            - name: PROJECT_BRANCH
+              value: david_udacity_project_green
+          image: herrfeder/broai:latest
+          name: broai
+          ports:
+            - containerPort: 8050
+          resources: {}
+          volumeMounts:
+            - mountPath: /home/datascientist/zeek_input
+              name: zeek-logs
+      restartPolicy: Always
+      volumes:
+        - name: zeek-logs
+          persistentVolumeClaim:
+            claimName: zeek-logs
+status: {}

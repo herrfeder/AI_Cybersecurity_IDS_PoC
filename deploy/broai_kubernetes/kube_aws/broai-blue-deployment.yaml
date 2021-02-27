@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: broai-blue
+  name: broai-blue
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: broai-blue 
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: broai-blue
+    spec:
+      containers:
+        - env:
+            - name: KAFKA_HOST
+              value: kafka
+            - name: KAFKA_PORT
+              value: "9092"
+            - name: KAFKA_TOPIC
+              value: zeek
+            - name: PROJECT_BRANCH
+              value: david_udacity_project_blue
+          image: herrfeder/broai:latest
+          name: broai
+          ports:
+            - containerPort: 8050
+          resources: {}
+      restartPolicy: Always
+status: {}

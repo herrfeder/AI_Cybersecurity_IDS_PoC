@@ -5,12 +5,14 @@ executors:
     docker:
       - image: cimg/python:3.8.0
   aws:
-    docker: 
+     docker: 
       - image: amazon/aws-cli
   dockerexe:
-    docker:
+     docker:
       - image: bayesimpact/circleci
-
+  eks:
+    docker:
+      - image: circleci/aws-eks
 
 commands:
   aws-install-dependencies:
@@ -122,10 +124,12 @@ jobs:
           at: .
       - source-venv
       - run:
-          name: Linting Green Deployment Source
+          name: Static App Test
           command: |
-            make statictest
-
+            if [[ ${CIRCLE_BRANCH} == david_udacity_project_green ]]
+              then
+                make statictest
+              fi
   scan-app:
     executor: python
     steps:
@@ -159,15 +163,56 @@ jobs:
       - source-venv
       - setup_remote_docker
       - run:
-          name: Linting Dockerfiles for broai and zeek container
+          name: Build application container for zeek and broai and upload to Dockerhub
           command: |
             make buildcontainer
             deploy/upload_docker.sh
 
+  prep-infrastructure-aws:
+    executor: aws
+    steps:
+      - checkout
+      - run:
+          name: Prepare network for AWS EKS cluster
+          working_directory: .circleci
+          command: |
+            scripts/push_cloudformation_stack.sh broainetwork cloudformation/network.yaml ${CIRCLE_WORKFLOW_ID:0:7} 
+      - run:
+          name: Prepare cluster for AWS EKS cluster
+          working_directory: .circleci
+          command: |
+            scripts/push_cloudformation_stack.sh broaicluster cloudformation/cluster.yaml ${CIRCLE_WORKFLOW_ID:0:7} 
+
+  deploy-k8-infrastructure:
+    executor: eks
+    steps:
+      - checkout
+      - run:
+          name: get authentication token for EKS kubernetes cluster and deploy cluster manifests
+          working_directory: deploy
+          command: |
+            mkdir .kube
+            aws eks --region us-west-2 update-kubeconfig --kubeconfig .kube/config-aws --name EKSCluster
+            ./run_kube_aws.sh
+
+  loadbalancer-update:
+    executor: eks
+    steps:
+      - checkout
+      - run:
+          name: Updating the green blue deployment loadbalancer
+          working_directory: deploy
+          command: |
+            mkdir .kube
+            aws eks --region us-west-2 update-kubeconfig --kubeconfig .kube/config-aws --name EKSCluster
+            if [[ ${CIRCLE_BRANCH} == "david_udacity_project_green" ]]
+              then
+                
+
 
 
   cleanup:
-    executor: aws
+     executor: aws
     steps:
       - checkout
       - aws-install-dependencies
@@ -179,23 +224,13 @@ jobs:
               --no-paginate --output text)
             export STACKS=($(aws cloudformation list-stacks --query "StackSummaries[*].StackName" \
               --stack-status-filter CREATE_COMPLETE --no-paginate --output text))
-            export S3_BUCKETS=($(aws s3 ls | cut -d" " -f3)) 
             
-            echo "${S3_BUCKETS[@]}"
             echo "${STACKS[@]}"
             echo "$CurrentWorkflowID"
  
       - run:
           name: Remove old stacks and files
           command: |
-            # empty all S3 Buckets that aren't tagged with current WorkflowID
-            for s3 in ${S3_BUCKETS[@]}; do 
-              if [[ ! "$s3" =~ "$CurrentWorkflowID" ]]; 
-                then
-                  echo "Removing Bucket $s3"
-                  aws s3 rm "s3://$s3" --recursive
-              fi
-            done
             # delete all stacks that aren't tagged with current WorkflowID
             for stack in ${STACKS[@]}; do 
               if [[ ! "$stack" =~ "${CurrentWorkflowID}" ]]
@@ -245,28 +280,19 @@ workflows:
             branches:
               only:
                 - main
-      #- deploy-infrastructure-blue:
-      #    requires: [prep-infrastructure-blue-green-aws]
-      #    context:
-      #      - aws_vars
-      #    filters:
-      #      branches:
-      #        only:
-      #            - master
-      #- smoke-test-green-blue:
-      #    requires: [deploy-infrastructure-green, deploy-infrastructure-blue]
-      #- test-dynamic-app-blue:
-      #    requires: [smoke-test-green-blue]
-      #    context:
-      #      - aws_vars
-      #       - udacity_devops_project3
-      #- loadbalancer-update:
-      #    requires:  [smoke-test]
-      #    context:
-      #      - aws_vars
-      #       - udacity_d evops_project3
-      #- cleanup:
-      #    requires: [loadbalancer-update]
-      #    context:
-      #      - aws_vars 
-      #      - udacity_devops_project3
+      - loadbalancer-update:
+          requires: [lint-app, test-static-app, scan-app]
+          context:
+            - aws_vars
+          filters:
+            branches:
+              only: /david_udacity_project\/.*/
+      - cleanup:
+          requires: [deploy-k8-infrastructure]
+          context:
+            - aws_vars
+          filters:
+            branches:
+              only:
+                - main
+ 

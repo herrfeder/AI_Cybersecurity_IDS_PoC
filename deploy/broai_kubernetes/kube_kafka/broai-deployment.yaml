@@ -26,7 +26,7 @@ spec:
       containers:
         - env:
             - name: KAFKA_HOST
-              value: kafka
+              value: kafka-service
             - name: KAFKA_PORT
               value: "9092"
             - name: KAFKA_TOPIC

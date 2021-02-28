@@ -1,10 +1,6 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  annotations:
-    kompose.cmd: kompose -f ../broai_compose/docker-compose.kafka.yml convert
-    kompose.version: 1.22.0 (955b78124)
-  creationTimestamp: null
   labels:
     io.kompose.service: zeek-blue
   name: zeek-blue
@@ -16,17 +12,13 @@ spec:
   strategy: {}
   template:
     metadata:
-      annotations:
-        kompose.cmd: kompose -f ../broai_compose/docker-compose.kafka.yml convert
-        kompose.version: 1.22.0 (955b78124)
-      creationTimestamp: null
       labels:
         io.kompose.service: zeek-blue
     spec:
       containers:
         - env:
             - name: KAFKA_HOST
-              value: kafka
+              value: kafka-service
             - name: KAFKA_PORT
               value: "9092"
             - name: KAFKA_TOPIC
@@ -34,7 +26,6 @@ spec:
             - name: TZ
               value: Europe/Berlin
           image: herrfeder/zeek_kafka:latest
-          name: zeek
+          name: zeek-blue
           resources: {}
       restartPolicy: Always
-status: {}

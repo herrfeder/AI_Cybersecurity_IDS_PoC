@@ -26,6 +26,7 @@ cp -r "$KUBECONFIGS"/"$KUBEPROJECT"/* "$KUBECONFIGS"/.kube_temp
 find "$KUBECONFIGS"/.kube_temp -type f -exec sed -i -e "s/{{EXTERNAL_IP}}/$MINIKUBE_IP/g" {} \;
 
 kubectl apply -f "$KUBECONFIGS"/.kube_temp
-  
+
+kubectl apply -f "$KUBECONFIGS"/ingress-local-service.yaml 
 
 

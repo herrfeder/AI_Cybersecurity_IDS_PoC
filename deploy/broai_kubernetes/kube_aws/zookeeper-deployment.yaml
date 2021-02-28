@@ -1,27 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  annotations:
-    kompose.cmd: kompose -f ../broai_compose/docker-compose.kafka.yml convert
-    kompose.version: 1.22.0 (955b78124)
-  creationTimestamp: null
   labels:
-    io.kompose.service: zookeeper
+    app: zookeeper
   name: zookeeper
 spec:
   replicas: 1
   selector:
     matchLabels:
-      io.kompose.service: zookeeper
+      app: zookeeper
   strategy: {}
   template:
     metadata:
-      annotations:
-        kompose.cmd: kompose -f ../broai_compose/docker-compose.kafka.yml convert
-        kompose.version: 1.22.0 (955b78124)
-      creationTimestamp: null
       labels:
-        io.kompose.service: zookeeper
+        app: zookeeper
     spec:
       containers:
         - image: wurstmeister/zookeeper
@@ -30,4 +22,3 @@ spec:
             - containerPort: 2181
           resources: {}
       restartPolicy: Always
-status: {}

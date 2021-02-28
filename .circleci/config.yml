@@ -41,37 +41,14 @@ commands:
          command: sh scripts/check_aws.sh
          when: << parameters.when >>
      - run:
-         name: Destroy backend
-         command: aws cloudformation delete-stack --stack-name "udapeople-pods-${CIRCLE_WORKFLOW_ID:0:7}"
+         name: Destroy cluster
+         command: aws cloudformation delete-stack --stack-name "broai_cluster"
          when: << parameters.when >>
      - run:
-         name: Destroy frontend
+         name: Destroy network
          command: |
-           aws s3 rm s3://udapeople-s3-${CIRCLE_WORKFLOW_ID:0:7} --recursive
-           aws cloudformation delete-stack --stack-name "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}"
+           aws cloudformation delete-stack --stack-name "broai_network"
          when: << parameters.when >>
-
-  revert-migrations:
-    description: Revert the last migration if successfully run in the current workflow.
-    parameters:
-      when:
-        type: string
-    steps:
-      - run:
-          name: Check existence of aws cli and install it
-          command: sh scripts/check_aws.sh
-          when: << parameters.when >>
-      - run:
-          working_directory: ./backend
-          command: |
-            export TYPEORM_HOST=$(cat ../.circleci/ansible/backend_ip)
-            SUCCESS=$(curl -H "token: 59b634f0-5d93-44a8-8147-ece659e04d52" --request GET https://api.memstash.io/values/migration-${CIRCLE_WORKFLOW_ID:0:7})
-            echo $SUCCESS
-            if [[ "$SUCCESS" == "true" ]]
-            then
-              npm run migrations:revert
-            fi
-          when: << parameters.when >>            
 
 jobs:
 
@@ -207,9 +184,14 @@ jobs:
             aws eks --region us-west-2 update-kubeconfig --kubeconfig .kube/config-aws --name EKSCluster
             if [[ ${CIRCLE_BRANCH} == "david_udacity_project_green" ]]
               then
-                
-
-
+                kubectl --kubeconfig .kube/config-aws rollout restart deployment broai-green
+                kubectl --kubeconfig .kube/config-aws apply -f broai_kubernetes/loadbalancer-aws-service-green-main.yaml
+ 
+            elif [[ ${CIRCLE_BRANCH} == "david_udacity_project_blue" ]]
+              then
+                kubectl --kubeconfig .kube/config-aws rollout restart deployment broai-blue
+                kubectl --kubeconfig .kube/config-aws apply -f broai_kubernetes/loadbalancer-aws-service-blue-main.yaml
+            fi
 
   cleanup:
      executor: aws

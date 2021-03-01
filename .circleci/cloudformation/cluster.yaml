@@ -50,7 +50,7 @@ Resources:
   EKSNodeGroup:
     Type: AWS::EKS::Nodegroup
     Properties:
-      ClusterName: !Ref EKSCluster
+      ClusterName: !Ref AWSK8SCluster
       NodeRole:
         Fn::ImportValue: !Sub NodeGroupArn-${WorkflowID}
       ScalingConfig:
@@ -64,8 +64,8 @@ Resources:
 Outputs:
 
   ClusterArn:
-    Description: The EKS Cluster Arn
-    Value: !GetAtt EKSCluster.Arn
+    Description: The AWS K8 Cluster Arn
+    Value: !GetAtt AWSK8SCluster.Arn
     Export:
       Name: !Sub "ClusterArn-${WorkflowID}"
   

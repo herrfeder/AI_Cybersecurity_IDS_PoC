@@ -106,6 +106,9 @@ jobs:
             if [[ ${CIRCLE_BRANCH} == david_udacity_project_green ]]
               then
                 make statictest
+            elif [[ ${CIRCLE_BRANCH} == main ]]
+              then
+                make statictest
               fi
   
   scan-app:

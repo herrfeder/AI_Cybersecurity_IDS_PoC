@@ -211,7 +211,7 @@ jobs:
             fi
 
   cleanup:
-     executor: aws
+    executor: aws
     steps:
       - checkout
       - aws-install-dependencies

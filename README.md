@@ -45,8 +45,6 @@
 
 ## Installation
 
-An example of this web app is temporary accessible on https://dev.datahack.de/aicspoc/ (Password Protected).
-Please be gentle, the resources are restricted. This app __isn't responsive__.
 
 ### Docker Instructions
 
@@ -69,7 +67,7 @@ Please be gentle, the resources are restricted. This app __isn't responsive__.
     
     > Please be aware, for now `zeek_location` has to be provided by you and is a folder which contains your running `conn.log`
 
-4. Go to http://127.0.0.1:8050/aicspoc/
+4. Go to http://127.0.0.1:8050/
 
 
 ## CLONE -> BUILD -> RUN -> HAPPY

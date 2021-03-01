@@ -155,6 +155,7 @@ jobs:
           working_directory: .circleci
           command: |
             STACK_EXISTS=$(aws cloudformation list-stacks --stack-status-filter CREATE_COMPLETE --query "StackSummaries[*].StackName" | grep "broainetwork")      
+            echo "$STACK_EXISTS"
             if [[ -z "$STACK_EXISTS" ]]
               then  
                 scripts/push_cloudformation_stack.sh broainetwork cloudformation/network.yaml ${CIRCLE_WORKFLOW_ID:0:7}

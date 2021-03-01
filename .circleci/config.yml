@@ -42,12 +42,12 @@ commands:
          when: << parameters.when >>
      - run:
          name: Destroy cluster
-         command: aws cloudformation delete-stack --stack-name "broai_cluster"
+         command: aws cloudformation delete-stack --stack-name "broaicluster"
          when: << parameters.when >>
      - run:
          name: Destroy network
          command: |
-           aws cloudformation delete-stack --stack-name "broai_network"
+           aws cloudformation delete-stack --stack-name "broainetwork"
          when: << parameters.when >>
 
 jobs:
@@ -107,6 +107,7 @@ jobs:
               then
                 make statictest
               fi
+  
   scan-app:
     executor: python
     steps:
@@ -115,7 +116,7 @@ jobs:
           at: .
       - source-venv
       - run:
-          name: Scanning Green Deployment Source
+          name: Scanning Deployment Source
           command: |
             make staticscan
 
@@ -153,12 +154,23 @@ jobs:
           name: Prepare network for AWS EKS cluster
           working_directory: .circleci
           command: |
-            scripts/push_cloudformation_stack.sh broainetwork cloudformation/network.yaml ${CIRCLE_WORKFLOW_ID:0:7} 
+            STACK_EXISTS=$(aws cloudformation list-stacks --stack-status-filter CREATE_COMPLETE ----query "StackSummaries[*].StackName" | grep "broainetwork")      
+            if [[ -z "$STACK_EXISTS" ]]
+              then  
+                scripts/push_cloudformation_stack.sh broainetwork cloudformation/network.yaml ${CIRCLE_WORKFLOW_ID:0:7}
+              fi
       - run:
           name: Prepare cluster for AWS EKS cluster
           working_directory: .circleci
           command: |
-            scripts/push_cloudformation_stack.sh broaicluster cloudformation/cluster.yaml ${CIRCLE_WORKFLOW_ID:0:7} 
+            STACK_EXISTS=$(aws cloudformation list-stacks --stack-status-filter CREATE_COMPLETE ----query "StackSummaries[*].StackName" | grep "broaicluster")      
+            if [[ -z "$STACK_EXISTS" ]]
+              then  
+                scripts/push_cloudformation_stack.sh broaicluster cloudformation/cluster.yaml ${CIRCLE_WORKFLOW_ID:0:7} 
+              fi
+      - destroy-environment:
+          when: on_fail 
+
 
   deploy-k8-infrastructure:
     executor: eks
@@ -169,8 +181,10 @@ jobs:
           working_directory: deploy
           command: |
             mkdir .kube
-            aws eks --region us-west-2 update-kubeconfig --kubeconfig .kube/config-aws --name EKSCluster
+            aws eks --region us-west-2 update-kubeconfig --kubeconfig .kube/config-aws --name AWSK8SCluster
             ./run_kube_aws.sh
+      - destroy-environment:
+          when: on_fail 
 
   loadbalancer-update:
     executor: eks
@@ -181,16 +195,19 @@ jobs:
           working_directory: deploy
           command: |
             mkdir .kube
-            aws eks --region us-west-2 update-kubeconfig --kubeconfig .kube/config-aws --name EKSCluster
+            aws eks --region us-west-2 update-kubeconfig --kubeconfig .kube/config-aws --name AWSK8SCluster
             if [[ ${CIRCLE_BRANCH} == "david_udacity_project_green" ]]
               then
                 kubectl --kubeconfig .kube/config-aws rollout restart deployment broai-green
                 kubectl --kubeconfig .kube/config-aws apply -f broai_kubernetes/loadbalancer-aws-service-green-main.yaml
- 
             elif [[ ${CIRCLE_BRANCH} == "david_udacity_project_blue" ]]
               then
                 kubectl --kubeconfig .kube/config-aws rollout restart deployment broai-blue
                 kubectl --kubeconfig .kube/config-aws apply -f broai_kubernetes/loadbalancer-aws-service-blue-main.yaml
+            elif [[ ${CIRCLE_BRANCH} == "main" ]]
+              then
+                kubectl --kubeconfig .kube/config-aws rollout restart deployment broai-green
+                kubectl --kubeconfig .kube/config-aws apply -f broai_kubernetes/loadbalancer-aws-service-green-main.yaml
             fi
 
   cleanup:

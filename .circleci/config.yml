@@ -38,7 +38,7 @@ commands:
     steps:
      - run:
          name: Check existence of aws cli and install it
-         command: sh scripts/check_aws.sh
+         command: sh .circleci/scripts/check_aws.sh
          when: << parameters.when >>
      - run:
          name: Destroy cluster

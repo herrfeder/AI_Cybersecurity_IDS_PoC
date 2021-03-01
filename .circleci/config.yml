@@ -154,6 +154,7 @@ jobs:
           name: Prepare network for AWS EKS cluster
           working_directory: .circleci
           command: |
+            aws cloudformation list-stacks
             STACK_EXISTS=$(aws cloudformation list-stacks --stack-status-filter CREATE_COMPLETE --query "StackSummaries[*].StackName" | grep "broainetwork")      
             echo "$STACK_EXISTS"
             if [[ -z "$STACK_EXISTS" ]]

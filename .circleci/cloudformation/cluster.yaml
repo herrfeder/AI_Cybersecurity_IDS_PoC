@@ -1,0 +1,76 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Parameters:
+  WorkflowID:
+    Description: An CI/CD specific Workflow Suffix for having build specific resources
+    Type: String
+    Default: 001
+
+Resources:
+
+  EKSSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: EKS Cluster Security Group
+      Tags:
+        - Key: stackname
+          Value: !Sub ${AWS::StackName}
+        - Key: project
+          Value: !Sub EKSSecurityGroup-${WorkflowID}
+      VpcId:
+        Fn::ImportValue: !Sub VPCID-${WorkflowID}
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 8888
+          ToPort: 8888
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 8889
+          ToPort: 8889
+          CidrIp: 0.0.0.0/0
+      
+  AWSK8SCluster:
+    Type: 'AWS::EKS::Cluster'
+    Properties:
+      Name: AWSK8SCluster
+      Version: '1.15'
+      RoleArn:
+        Fn::ImportValue: !Sub ClusterRoleArn-${WorkflowID}
+      ResourcesVpcConfig:
+        SecurityGroupIds:
+          - !Ref EKSSecurityGroup
+        SubnetIds:
+          - Fn::ImportValue: !Sub PrivateSubnet01-${WorkflowID}
+          - Fn::ImportValue: !Sub PrivateSubnet02-${WorkflowID}
+
+  EKSNodeGroup:
+    Type: AWS::EKS::Nodegroup
+    Properties:
+      ClusterName: !Ref EKSCluster
+      NodeRole:
+        Fn::ImportValue: !Sub NodeGroupArn-${WorkflowID}
+      ScalingConfig:
+        MinSize: 1
+        DesiredSize: 1
+        MaxSize: 3
+      Subnets:
+        - Fn::ImportValue: !Sub PrivateSubnet01-${WorkflowID}
+        - Fn::ImportValue: !Sub PrivateSubnet02-${WorkflowID}
+
+Outputs:
+
+  ClusterArn:
+    Description: The EKS Cluster Arn
+    Value: !GetAtt EKSCluster.Arn
+    Export:
+      Name: !Sub "ClusterArn-${WorkflowID}"
+  
+  NodeGroupArn:
+    Description: The EKS Node ID
+    Value: !GetAtt EKSNodeGroup.Arn
+    Export:
+      Name: !Sub "NodeArn-${WorkflowID}"

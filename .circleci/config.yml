@@ -154,13 +154,11 @@ jobs:
           name: Prepare network for AWS EKS cluster
           working_directory: .circleci
           command: |
-            #STACK_EXISTS=$(aws cloudformation list-stacks --stack-status-filter CREATE_COMPLETE --query "StackSummaries[*].StackName" | grep "broainetwork")      
-            #echo "test"
-            #if [[ -z "$STACK_EXISTS" ]]
-            #  then  
-            #    echo "test"
+            STACK_EXISTS=$(aws cloudformation list-stacks --stack-status-filter CREATE_COMPLETE --query "StackSummaries[*].StackName" | grep "broainetwork")      
+            if [[ -z "$STACK_EXISTS" ]]
+              then  
                 scripts/push_cloudformation_stack.sh broainetwork cloudformation/network.yaml ${CIRCLE_WORKFLOW_ID:0:7}
-            #  fi
+              fi
           no_output_timeout: 30m
       - run:
           name: Prepare cluster for AWS EKS cluster

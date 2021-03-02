@@ -237,7 +237,7 @@ jobs:
            
             echo $HOST_MAIN
 
-            curl -s $HOST_MAIN
+            curl $HOST_MAIN
  
             OUTPUT_MAIN=$(curl -s $HOST_MAIN)
             OUTPUT_DEV=$(curl -s $HOST_DEV)

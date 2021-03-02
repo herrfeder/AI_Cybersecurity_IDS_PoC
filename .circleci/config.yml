@@ -49,12 +49,12 @@ commands:
           when: << parameters.when >>
       - run:
           name: Destroy cluster
-          command: aws cloudformation delete-stack --stack-name "broaicluster01"
+          command: aws cloudformation delete-stack --region us-west-2 --stack-name "broaicluster01"
           when: << parameters.when >>
       - run:
           name: Destroy network
           command: |
-            aws cloudformation delete-stack --stack-name "broainetwork01"
+            aws cloudformation delete-stack --region us-west-2 --stack-name "broainetwork01"
           when: << parameters.when >>
 
 jobs:

@@ -1,3 +1,5 @@
+[![CircleCI](https://circleci.com/gh/herrfeder/AI_Cybersecurity_IDS_PoC.svg?style=svg)]
+
 # AI_Cybersecurity_IDS_PoC 
 and 
 # Davids Udacity CloudDevOps Nanodegree Capstone Project

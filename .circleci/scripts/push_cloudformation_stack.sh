@@ -9,7 +9,7 @@ if [ -z "$STACK_EXISTS" ]
 	--template-file $2 \
 	--capabilities "CAPABILITY_IAM" "CAPABILITY_NAMED_IAM" \
 	--parameter-overrides "WorkflowID=$3" \
-	--region=us-west-2
+	--region us-west-2
 
   else
 	echo "Stack $1 already exists"

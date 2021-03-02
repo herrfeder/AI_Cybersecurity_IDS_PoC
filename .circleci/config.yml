@@ -233,11 +233,10 @@ jobs:
             HOST_DEV=$(kubectl --kubeconfig .kube/config-aws get svc loadbalancer-dev --output jsonpath='{.status.loadBalancer.ingress[0].hostname}')
            
             echo "$HOST_MAIN"
-              
-            curl $HOST_MAIN
+            echo "$HOST_DEV"
  
-            OUTPUT_MAIN=$(curl -s $HOST_MAIN)
-            OUTPUT_DEV=$(curl -s $HOST_DEV)
+            OUTPUT_MAIN=$(curl -s "http://$HOST_MAIN")
+            OUTPUT_DEV=$(curl -s "http://$HOST_DEV")
 
             if [[ -z $(echo $OUTPUT_MAIN) | grep "_dash-loading" ]] 
               then

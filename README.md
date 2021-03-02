@@ -51,17 +51,21 @@
 
 ### Local Docker-Compose Deployment
 
-1. Create directory and download Dockerfile:
-    ```
-    wget https://raw.githubusercontent.com/herrfeder/AI_Cybersecurity_IDS_PoC/main/Dockerfile
+1. Clone the repository:
+    ```bash
+    git clone https://github.com/herrfeder/AI_Cybersecurity_IDS_PoC.git
     ```
 
-2. Build Docker Container:
+2. Go into Deploy Folder and `run_compose.sh` to run `file`-based or `kafka`-based Stack:
     ```
-    docker build . -t broai
+    cd deploy
+    ./run_compose.sh kafka
+    # OR
+    ./run_compose.sh file
     ```
+
+  * first run will take very long because Docker Containers will be build locally and the zeek compilation and Kafka Plugin Install will take a while 
     
-    All models are pretrained and the build process shouldn't take too long.
     
 3. Run Docker Container with mounted Zeek Volume:
     ```

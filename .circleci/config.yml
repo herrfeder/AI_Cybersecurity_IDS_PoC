@@ -213,10 +213,35 @@ jobs:
           when: on_fail 
 
   smoketest:
-    executor: python
+    executor: eks
     steps:
       - checkout    
+      - run:
+          name: Get LoadBalancer External IPs and checking Availability
+          working_directory: deploy
+          command: |
+            mkdir .kube
+            aws eks --region us-west-2 update-kubeconfig --kubeconfig .kube/config-aws --name AWSK8SCluster
+            IP_MAIN=$(kubectl --kubeconfig .kube/config-aws get svc loadbalancer-main --output jsonpath='{.spec.externalIP}')
+            echo $IP_MAIN
+            IP_DEV=$(kubectl --kubeconfig .kube/config-aws get svc loadbalancer-dev --output jsonpath='{.spec.externalIP}')
+            echo $IP_DEV
 
+            OUTPUT_MAIN=$(curl -s $IP_MAIN)
+            OUTPUT_DEV=$(curl -s $IP_DEV)
+
+            if [[ -z $(echo $OUTPUT_MAIN | grep "_dash-loading" ]]; then
+              echo "Main Endpoint not online"
+              exit 1
+            elif [[ -z $(echo $OUTPUT_DEV | grep "_dash-loading" ]]; then
+              echo "Dev Endpoint not online"
+              exit 1
+            else
+              echo "Dev and Main Endpoints are online and good to go :)"
+              exit 0
+            fi
+      - destroy-environment:
+          when: on_fail
   cleanup:
     executor: aws
     steps:
@@ -262,14 +287,14 @@ workflows:
             branches:
               only:
                 - main 
-      #- build-upload-container:
-      #    requires: [lint-dockerfiles]
-      #    context:
-      #      - dockerhub
-      #    filters:
-      #      branches:
-      #        only:
-      #          - main 
+      - build-upload-container:
+          requires: [lint-dockerfiles]
+          context:
+            - dockerhub
+          filters:
+            branches:
+              only:
+                - main 
       - prep-infrastructure-aws:
           requires: [lint-app, test-static-app, scan-app]
           context:

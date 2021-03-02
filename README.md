@@ -1,4 +1,6 @@
-# AI_Cybersecurity_IDS_PoC and Davids Udacity CloudDevOps Nanodegree Capstone Project (see DevOps Deployments on installation part)
+# AI_Cybersecurity_IDS_PoC 
+and 
+# Davids Udacity CloudDevOps Nanodegree Capstone Project
 
   * Winning Solution of BWI Data Analytics Hackathon 2020
   * CloudDevOps Pipeline with Green-Blue-Deployment for Davids Udacity CloudDevOps Nanodegree Capstone Project
@@ -46,6 +48,11 @@
 
 
 ## Installation/Deployment (CloudDevOps Nanodegree Part)
+
+| CircleCI Branch CI/CD Pipeline | CircleCI Main CI/CD Pipeline |
+|--------------------------------------|--------------------------------------|
+| ![](https://github.com/herrfeder/AI_Cybersecurity_IDS_PoC/raw/main/screenshots/capstone_broai_branch_pipeline.png) | ![](https://github.com/herrfeder/AI_Cybersecurity_IDS_PoC/raw/main/screenshots/capstone_broai_main_pipeline.png) |
+
 
 
 ### Local Docker-Compose Deployment
@@ -120,7 +127,6 @@
     ```
 
 5. Wait for finishing and check with `kubectl --kubeconfig .kube/config-aws get svc` the resulting Loadbalancer Hostnames and access them. :)
-
 
 
 ## TODO

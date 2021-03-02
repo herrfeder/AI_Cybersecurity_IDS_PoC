@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    io.kompose.service: zeek-blue
+  name: zeek-blue
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: zeek-blue
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        io.kompose.service: zeek-blue
+    spec:
+      containers:
+        - env:
+            - name: KAFKA_HOST
+              value: kafka-service
+            - name: KAFKA_PORT
+              value: "9092"
+            - name: KAFKA_TOPIC
+              value: zeek
+            - name: TZ
+              value: Europe/Berlin
+          image: herrfeder/zeek_kafka:latest
+          name: zeek-blue
+          resources: {}
+      restartPolicy: Always

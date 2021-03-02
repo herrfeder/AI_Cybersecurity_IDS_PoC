@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: zeek-green
+  name: zeek-green
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: zeek-green
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: zeek-green
+    spec:
+      containers:
+        - image: herrfeder/zeek_kafka:latest
+          name: zeek
+          ports:
+            - containerPort: 80 
+          resources: {}
+          volumeMounts:
+            - mountPath: /logs
+              name: zeek-logs
+      restartPolicy: Always
+      volumes:
+        - name: zeek-logs
+          persistentVolumeClaim:
+            claimName: zeek-logs

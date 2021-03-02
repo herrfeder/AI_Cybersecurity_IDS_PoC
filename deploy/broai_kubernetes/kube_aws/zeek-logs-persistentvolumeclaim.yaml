@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: zeek-logs
+spec:
+  storageClassName: manual
+  selector:
+    matchLabels:
+      volume: "zeek-logs"
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 100Mi
+status: {}

@@ -5,36 +5,44 @@
 # app.py should pass pylint
 # (Optional) Build a simple integration test
 
+SHELL := /bin/bash
+
 setup:
 	# Create python virtualenv & source it
-	# source ~/.devops/bin/activate
-	python3 -m venv ~/.devops
+	python3 -m venv .devops
+
 
 install:
-	# This should be run from inside a virtualenv
-	pip install --upgrade pip &&\
-		pip install -r requirements.txt
+	pip3 install -r requirements.txt
 
-test:
-	# Additional, optional, tests could go here
-	python -m pytest -vv --cov=myrepolib tests/*.py
-	#python -m pytest --nbval notebook.ipynb
 
+devinstall:
+	.circleci/scripts/install_requirements.sh
+
+
+buildcontainer:
+	deploy/run_compose.sh kafka build
+
+
+statictest:
+	python -m pytest -vv tests/*.py
 
 staticscan:
-	bandit -r .
+	bandit -r ./app -lll
+
 
 dynamicscan:
 	# doing some stuff with selenium for the frontend
 
 
-lint:
-	# See local hadolint install instructions:   https://github.com/hadolint/hadolint
-	# This is linter for Dockerfiles
-	hadolint Dockerfile
-	# This is a linter for Python source code linter: https://www.pylint.org/
-	# This should be run from inside a virtualenv
-	pylint --disable=R,C,W1203 app.py
-	find . -name '*.py' -exec autopep8 --aggressive --in-place '{}' \;
+sourcelint:
+	autopep8 --aggressive --in-place --recursive -v app/
+	find app -name '*.py' -print0 | xargs -I '{}' -0 pylint -E --disable=E1101 '{}'
+
+
+dockerlint:
+	.devops/hadolint --ignore DL3008 --ignore DL3013 deploy/broai_compose/broai-docker/Dockerfile
+	.devops/hadolint --ignore DL3008 --ignore DL3013 deploy/broai_compose/zeek-docker/Dockerfile
+
 
 all: install lint test

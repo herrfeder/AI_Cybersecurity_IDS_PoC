@@ -22,7 +22,8 @@ services:
       - zeek
     build:
       context: broai-docker
-      dockerfile: Dockerfile.file
+    environment:
+      PROJECT_BRANCH: 'david_udacity_project_green'
     ports:
       - 8050:8050
     volumes:

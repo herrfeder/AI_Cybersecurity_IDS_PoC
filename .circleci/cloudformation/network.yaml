@@ -1,0 +1,199 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Parameters:
+  WorkflowID:
+    Description: An CI/CD specific Workflow Suffix for having build specific resources
+    Type: String
+    Default: 001
+
+  VpcCIDR:
+    Description: Please enter the IP range (CIDR notation) for this VPC
+    Type: String
+    Default: 10.0.0.0/16
+
+  PrivateSubnet01CIDR:
+    Description: CIDR for public subnet in first availability zone
+    Type: String
+    Default: 10.0.0.0/24
+
+  PrivateSubnet02CIDR:
+    Description: CIDR for public subnet in second availability zone
+    Type: String
+    Default: 10.0.1.0/24
+
+Mappings:
+  ServicePrincipals:
+    aws-cn:
+      ec2: ec2.amazonaws.com.cn
+    aws-us-gov:
+      ec2: ec2.amazonaws.com
+    aws:
+      ec2: ec2.amazonaws.com
+
+Resources:
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref VpcCIDR
+      EnableDnsHostnames: true
+      Tags:
+        - Key: project
+          Value: !Sub VPC-${WorkflowID}
+
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: project
+          Value: !Sub igw-${WorkflowID}
+
+  InternetGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      InternetGatewayId: !Ref InternetGateway
+      VpcId: !Ref VPC
+
+  PrivateSubnet01:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [ 0, !GetAZs '' ]
+      CidrBlock: !Ref PrivateSubnet01CIDR
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: project
+          Value: !Sub pubsub01-${WorkflowID}
+
+  PrivateSubnet02:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [ 1, !GetAZs '' ]
+      CidrBlock: !Ref PrivateSubnet02CIDR
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: project
+          Value: !Sub pubsub02-${WorkflowID}
+
+  NatGateway01EIP:
+    Type: AWS::EC2::EIP
+    DependsOn: InternetGatewayAttachment
+    Properties:
+      Domain: vpc
+
+  NatGateway02EIP:
+    Type: AWS::EC2::EIP
+    DependsOn: InternetGatewayAttachment
+    Properties:
+      Domain: vpc
+
+  NatGateway01:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt NatGateway01EIP.AllocationId
+      SubnetId: !Ref PrivateSubnet01
+
+  NatGateway02:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt NatGateway02EIP.AllocationId
+      SubnetId: !Ref PrivateSubnet02
+
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub pubroute-${WorkflowID}
+
+  DefaultPublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: InternetGatewayAttachment
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0        
+      GatewayId: !Ref InternetGateway
+
+  PrivateSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref PrivateSubnet01
+
+  PrivateSubnet2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref PrivateSubnet02
+
+  eksClusterRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - eks.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonEKSClusterPolicy
+        - arn:aws:iam::aws:policy/AmazonEKSServicePolicy
+
+  NodeInstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - !FindInMap [ ServicePrincipals, !Ref "AWS::Partition", ec2 ]
+            Action:
+              - sts:AssumeRole
+      ManagedPolicyArns:
+        - !Sub "arn:${AWS::Partition}:iam::aws:policy/AmazonEKSWorkerNodePolicy"
+        - !Sub "arn:${AWS::Partition}:iam::aws:policy/AmazonEKS_CNI_Policy"
+        - !Sub "arn:${AWS::Partition}:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+      Path: /
+
+Outputs:
+  OVPC:
+    Description: A reference to the created VPC
+    Value: !Ref VPC
+    Export:
+      Name: !Sub "VPCID-${WorkflowID}"
+
+  OPrivateSubnet1:
+    Description: A reference to the created private subnet 1
+    Value: !Ref PrivateSubnet01
+    Export:
+      Name: !Sub "PrivateSubnet01-${WorkflowID}"
+
+  OPrivateSubnet2:
+    Description: A reference to the created private subnet 2
+    Value: !Ref PrivateSubnet02
+    Export:
+      Name: !Sub "PrivateSubnet02-${WorkflowID}"
+
+  OPrivateSubnets:
+    Description: A list of the private subnets
+    Value: !Join [ ",", [ !Ref PrivateSubnet01, !Ref PrivateSubnet02 ]]
+    Export:
+      Name: !Sub "PrivateSubnets-${WorkflowID}"
+
+  OClusterRoleArn:
+    Description: The role that Amazon EKS will use to create AWS resources for Kubernetes clusters
+    Value: !GetAtt eksClusterRole.Arn
+    Export:
+      Name: !Sub "ClusterRoleArn-${WorkflowID}"
+
+  ONodeGroupArn:
+    Description: The instance role that Amazon EKS will use to create AWS resources for Kubernetes clusters
+    Value: !GetAtt NodeInstanceRole.Arn
+    Export:
+      Name: !Sub "NodeGroupArn-${WorkflowID}"

@@ -19,6 +19,11 @@ if [ ! -f /zeek/etc/node.cfg ] || [ ! -s /zeek/etc/node.cfg ]; then
 	fi
 fi
 
+### install and run Apache for having test Web-Server
+
+apt update
+apt install -y apache2
+service apache2 start
 
 ### set interface in node.cfg
 interfaces="$(ip link | awk -F: '$0 !~ "lo|vir|br-|docker|^[^0-9]"{print $2;getline}' | sed -z 's/\n/ /g;s/ $/\n/')"
@@ -37,6 +42,13 @@ fi
 sed -i "s/\$KAFKA_TOPIC/$KAFKA_TOPIC/" /zeek/share/zeek/site/local.zeek
 sed -i "s/\$KAFKA_HOST/$KAFKA_HOST/" /zeek/share/zeek/site/local.zeek
 sed -i "s/\$KAFKA_PORT/$KAFKA_PORT/" /zeek/share/zeek/site/local.zeek
+
+### set timezone
+
+ln -snf /usr/share/zoneinfo/$TZ /etc/localtime
+echo $TZ > /etc/timezone
+
+
 
 # do final log rotation
 stop() {

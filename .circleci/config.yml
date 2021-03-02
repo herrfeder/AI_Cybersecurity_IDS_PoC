@@ -33,7 +33,7 @@ commands:
   destroy-environment:
     description: Destroy AWS EKS resources with specific CIRCE_WORKFLOW_ID.
     parameters:
-       when:
+      when:
         type: string
     steps:
       - run:
@@ -300,14 +300,14 @@ workflows:
             branches:
               only:
                 - main 
-      #- build-upload-container:
-      #    requires: [lint-dockerfiles]
-      #    context:
-      #      - dockerhub
-      #    filters:
-      #      branches:
-      #        only:
-      #          - main 
+      - build-upload-container:
+          requires: [lint-dockerfiles]
+          context:
+            - dockerhub
+          filters:
+            branches:
+              only:
+                - main 
       - prep-infrastructure-aws:
           requires: [lint-app, test-static-app, scan-app]
           context:

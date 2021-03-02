@@ -1,8 +1,12 @@
-# AI_Cybersecurity_IDS_PoC
+# AI_Cybersecurity_IDS_PoC 
+and 
+# Davids Udacity CloudDevOps Nanodegree Capstone Project
 
   * Winning Solution of BWI Data Analytics Hackathon 2020
+  * CloudDevOps Pipeline with Green-Blue-Deployment for Davids Udacity CloudDevOps Nanodegree Capstone Project
 
 ![bwi_hackathon_badge](https://abload.de/img/bwi_dataanalyticshack7ujy4.png)
+
 
 ## App Screenshots
 
@@ -11,6 +15,8 @@
 | Monitoring Dashboard | Model Performance | Anomaly Training | Application of Models |
 |--------------------------------------|--------------------------------------|--------------------------------------|--------------------------------------|
 | ![](https://github.com/herrfeder/AI_Cybersecurity_IDS_PoC/raw/main/screenshots/analysis_dashboard.png) | ![](https://github.com/herrfeder/AI_Cybersecurity_IDS_PoC/raw/main/screenshots/model_performance.png) | ![](https://github.com/herrfeder/AI_Cybersecurity_IDS_PoC/raw/main/screenshots/train_anomaly.png) | ![](https://github.com/herrfeder/AI_Cybersecurity_IDS_PoC/raw/main/screenshots/apply_model.png) |
+
+
 
 ## Concept
 
@@ -41,39 +47,95 @@
     * Implementing live trained Anomaly Detection using Isolation Forest from [scikit-learn](https://github.com/scikit-learn/scikit-learn)  
 
 
+## Installation/Deployment (CloudDevOps Nanodegree Part)
+
+| CircleCI Branch CI/CD Pipeline | CircleCI Main CI/CD Pipeline |
+|--------------------------------------|--------------------------------------|
+| ![](https://github.com/herrfeder/AI_Cybersecurity_IDS_PoC/raw/main/screenshots/capstone_broai_branch_pipeline.png) | ![](https://github.com/herrfeder/AI_Cybersecurity_IDS_PoC/raw/main/screenshots/capstone_broai_main_pipeline.png) |
 
 
-## Installation
 
-### Docker Instructions
+### Local Docker-Compose Deployment
 
-1. Create directory and download Dockerfile:
+
+1. Clone the repository:
+    ```bash
+    git clone https://github.com/herrfeder/AI_Cybersecurity_IDS_PoC.git
     ```
-    wget https://raw.githubusercontent.com/herrfeder/AI_Cybersecurity_IDS_PoC/main/Dockerfile
+
+2. Go into Deploy Folder and `run_compose.sh` to run `file`-based or `kafka`-based Stack:
+    ```
+    cd deploy
+    ./run_compose.sh kafka
+    # OR
+    ./run_compose.sh file
     ```
 
-2. Build Docker Container:
+  * first run will take very long because Docker Containers will be build locally and the zeek compilation and Kafka Plugin Install will take a while 
+
+3. Go to http://127.0.0.1:8050/
+
+
+### Local Kubernetes Deployment
+
+1. You need to build the previous Compose-based stack at least once and upload the resulting Docker Container using the `upload-docker.sh` script or you relying on my public-built Container:
+  * zeek_kafka https://hub.docker.com/repository/docker/herrfeder/zeek_kafka (already in k8s Configs)
+  * broai https://hub.docker.com/repository/docker/herrfeder/broai (already in k8s Configs)    
+    
+2. You have to prepare and start minikube and run `run_kube_local.sh`:    
+    ```bash
+    cd deploy
+    ./run_kube_local.sh file
+    # OR (you can run booth as well)
+    ./run_kube_local.sh file 
     ```
-    docker build . -t broai
+
+3. Now add local Ingress Rule to reach the broai endpoint:
+    ```bash
+    kubectl apply -f broai_kubernetes/ingress-local-service.yaml
+    # Check now these ingress service with
+    kubectl get svc
+    ```
+
+4. Now add `green.broai` and `blue.broai` with your minikube IP to your `/etc/hosts` and visit this domains. 
+
+
+### AWS Kubernetes Deployment
+
+1. You need to build the previous Compose-based stack at least once and upload the resulting Docker Container using the `upload-docker.sh` script or you relying on my public-built Container:
+  * zeek_kafka https://hub.docker.com/repository/docker/herrfeder/zeek_kafka (already in k8s Configs)
+  * broai https://hub.docker.com/repository/docker/herrfeder/broai (already in k8s Configs)    
+
+2. Install `aws-cli` and deploy the Network and Cluster Requirements with the provided AWS Cloudformation Scripts:
+    ```bash
+    cd .circleci
+
+    scripts/push_cloudformation_stack.sh broainetwork cloudformation/network.yaml <your individual id>
+    scripts/push_cloudformation_stack.sh broaicluster cloudformation/cluster.yaml <your individual id>
+    ```
+ 
+3. Get Access Token to acess your AWS EKS Cluster with kubectl:
+    ```bash
+    cd deploy
+
+    mkdir .kube
+    aws eks --region us-west-2 update-kubeconfig --kubeconfig .kube/config-aws --name AWSK8SCluster
+    ``` 
+
+4. Deploy Kubernetes Manifests:
+    ```bash
+    ./run_kube_aws.sh
     ```
     
-    All models are pretrained and the build process shouldn't take too long.
-    
-3. Run Docker Container with mounted Zeek Volume:
-    ```
-    docker run -p 8050:8050 -v {zeek_location}:/home/datascientist/zeek_input broai:latest
-    ```
-    
-    > Please be aware, for now `zeek_location` has to be provided by you and is a folder which contains your running `conn.log`
-
 4. Go to http://127.0.0.1:8050/
 
 
-## CLONE -> BUILD -> RUN -> HAPPY
+5. Wait for finishing and check with `kubectl --kubeconfig .kube/config-aws get svc` the resulting Loadbalancer Hostnames and access them. :)
+
 
 ## TODO
 
-  * replacing filebased Datapipeline by Apache Kafka feed
+  * replacing filebased Datapipeline by Apache Kafka feed (DONE in scope of Davids Udacity CloudDevOps Nanodegree Capstone Project)
     * faster feeding into webapp
     * more elegant data management
   * also enabling Random Forest and Neural Net training during runtime

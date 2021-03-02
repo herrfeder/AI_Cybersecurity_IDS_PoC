@@ -12,7 +12,7 @@ executors:
       - image: bayesimpact/circleci
   eks:
     docker:
-      - image: circleci/aws-eks
+      - image: bearengineer/awscli-kubectl
 
 commands:
   aws-install-dependencies:
@@ -168,7 +168,6 @@ jobs:
       - destroy-environment:
           when: on_fail 
 
-
   deploy-k8-infrastructure:
     executor: eks
     steps:
@@ -187,7 +186,7 @@ jobs:
     executor: eks
     steps:
       - checkout
-      - run:
+    equires  - run:
           name: Updating the green blue deployment loadbalancer
           working_directory: deploy
           command: |
@@ -201,11 +200,14 @@ jobs:
               then
                 kubectl --kubeconfig .kube/config-aws rollout restart deployment broai-blue
                 kubectl --kubeconfig .kube/config-aws apply -f broai_kubernetes/loadbalancer-aws-service-blue-main.yaml
-            elif [[ ${CIRCLE_BRANCH} == "main" ]]
-              then
-                kubectl --kubeconfig .kube/config-aws rollout restart deployment broai-green
-                kubectl --kubeconfig .kube/config-aws apply -f broai_kubernetes/loadbalancer-aws-service-green-main.yaml
             fi
+      - destroy-environment:
+          when: on_fail 
+
+  smoketest:
+    executor: python
+    steps:
+      -checkout    
 
   cleanup:
     executor: aws
@@ -283,6 +285,8 @@ workflows:
           filters:
             branches:
               only: /david_udacity_project\/.*/
+      - smoketest:
+          requires: [deploy-k8-infrastructure, loadbalancer-update] 
       - cleanup:
           requires: [deploy-k8-infrastructure]
           context:

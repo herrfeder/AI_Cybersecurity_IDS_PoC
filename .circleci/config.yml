@@ -186,7 +186,7 @@ jobs:
     executor: eks
     steps:
       - checkout
-    equires  - run:
+      - run:
           name: Updating the green blue deployment loadbalancer
           working_directory: deploy
           command: |

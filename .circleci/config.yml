@@ -234,6 +234,8 @@ jobs:
            
             echo "$HOST_MAIN"
             echo "$HOST_DEV"
+
+            curl "http://$HOST_MAIN"
  
             OUTPUT_MAIN=$(curl -s "http://$HOST_MAIN")
             OUTPUT_DEV=$(curl -s "http://$HOST_DEV")

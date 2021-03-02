@@ -1,6 +1,7 @@
 # AI_Cybersecurity_IDS_PoC and Davids Udacity CloudDevOps Nanodegree Capstone Project (see DevOps Deployments on installation part)
 
   * Winning Solution of BWI Data Analytics Hackathon 2020
+  * CloudDevOps Pipeline with Green-Blue-Deployment for Davids Udacity CloudDevOps Nanodegree Capstone Project
 
 ![bwi_hackathon_badge](https://abload.de/img/bwi_dataanalyticshack7ujy4.png)
 
@@ -44,8 +45,6 @@
     * Implementing live trained Anomaly Detection using Isolation Forest from [scikit-learn](https://github.com/scikit-learn/scikit-learn)  
 
 
-
-
 ## Installation/Deployment (CloudDevOps Nanodegree Part)
 
 
@@ -65,23 +64,24 @@
     ```
 
   * first run will take very long because Docker Containers will be build locally and the zeek compilation and Kafka Plugin Install will take a while 
-    
-    
-3. Run Docker Container with mounted Zeek Volume:
-    ```
-    docker run -p 8050:8050 -v {zeek_location}:/home/datascientist/zeek_input broai:latest
-    ```
-    
-    > Please be aware, for now `zeek_location` has to be provided by you and is a folder which contains your running `conn.log`
 
-4. Go to http://127.0.0.1:8050/
+3. Go to http://127.0.0.1:8050/
 
 
-## CLONE -> BUILD -> RUN -> HAPPY
+### Local Kubernetes Deployment
+
+1. You need to build the previous Compose-based stack at least once and upload the resulting Docker Container using the `upload-docker.sh` script or you relying on my public-built Container:
+  * zeek_kafka https://hub.docker.com/repository/docker/herrfeder/zeek_kafka (already in k8s Configs)
+  * broai https://hub.docker.com/repository/docker/herrfeder/broai (already in k8s Configs)    
+    
+    
+
+
+
 
 ## TODO
 
-  * replacing filebased Datapipeline by Apache Kafka feed
+  * replacing filebased Datapipeline by Apache Kafka feed (DONE in scope of Davids Udacity CloudDevOps Nanodegree Capstone Project)
     * faster feeding into webapp
     * more elegant data management
   * also enabling Random Forest and Neural Net training during runtime

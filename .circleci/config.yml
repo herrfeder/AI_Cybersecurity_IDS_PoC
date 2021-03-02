@@ -49,12 +49,12 @@ commands:
           when: << parameters.when >>
       - run:
           name: Destroy cluster
-          command: aws cloudformation delete-stack --stack-name "broaicluster"
+          command: aws cloudformation delete-stack --stack-name "broaicluster01"
           when: << parameters.when >>
       - run:
           name: Destroy network
           command: |
-            aws cloudformation delete-stack --stack-name "broainetwork"
+            aws cloudformation delete-stack --stack-name "broainetwork01"
           when: << parameters.when >>
 
 jobs:
@@ -168,13 +168,13 @@ jobs:
           name: Prepare network for AWS EKS cluster
           working_directory: .circleci
           command: |
-            scripts/push_cloudformation_stack.sh broainetwork cloudformation/network.yaml ${CIRCLE_WORKFLOW_ID:0:7}
+            scripts/push_cloudformation_stack.sh broainetwork01 cloudformation/network.yaml ${CIRCLE_WORKFLOW_ID:0:7}
           no_output_timeout: 30m
       - run:
           name: Prepare cluster for AWS EKS cluster
           working_directory: .circleci
           command: |
-            scripts/push_cloudformation_stack.sh broaicluster cloudformation/cluster.yaml ${CIRCLE_WORKFLOW_ID:0:7} 
+            scripts/push_cloudformation_stack.sh broaicluster01 cloudformation/cluster.yaml ${CIRCLE_WORKFLOW_ID:0:7} 
           no_output_timeout: 30m
       - destroy-environment:
           when: on_fail 

@@ -228,8 +228,8 @@ jobs:
           working_directory: deploy
           command: |
             mkdir .kube
-            kubectl --kubeconfig .kube/config-aws describe svc loadbalancer-main
             aws eks --region us-west-2 update-kubeconfig --kubeconfig .kube/config-aws --name AWSK8SCluster
+            kubectl --kubeconfig .kube/config-aws describe svc loadbalancer-main
             IP_MAIN=$(kubectl --kubeconfig .kube/config-aws get svc loadbalancer-main --output jsonpath='{.spec.externalIPs[0]}')
             echo $IP_MAIN
             IP_DEV=$(kubectl --kubeconfig .kube/config-aws get svc loadbalancer-dev --output jsonpath='{.spec.externalIPs[0]}')

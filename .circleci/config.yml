@@ -12,7 +12,7 @@ executors:
       - image: bayesimpact/circleci
   eks:
     docker:
-      - image: circleci/aws-eks
+      - image: bearengineer/awscli-kubectl
 
 commands:
   aws-install-dependencies:
@@ -38,7 +38,7 @@ commands:
     steps:
      - run:
          name: Check existence of aws cli and install it
-         command: sh scripts/check_aws.sh
+         command: sh .circleci/scripts/check_aws.sh
          when: << parameters.when >>
      - run:
          name: Destroy cluster
@@ -106,6 +106,13 @@ jobs:
             if [[ ${CIRCLE_BRANCH} == david_udacity_project_green ]]
               then
                 make statictest
+            elif [[ ${CIRCLE_BRANCH} == main ]]
+              then
+                make statictest
+            elif [[ ${CIRCLE_BRANCH} == david_udacity_project_blue ]]
+              then
+                echo "No test procedures implemented yet"
+                exit 0
               fi
   
   scan-app:
@@ -154,23 +161,16 @@ jobs:
           name: Prepare network for AWS EKS cluster
           working_directory: .circleci
           command: |
-            STACK_EXISTS=$(aws cloudformation list-stacks --stack-status-filter CREATE_COMPLETE ----query "StackSummaries[*].StackName" | grep "broainetwork")      
-            if [[ -z "$STACK_EXISTS" ]]
-              then  
-                scripts/push_cloudformation_stack.sh broainetwork cloudformation/network.yaml ${CIRCLE_WORKFLOW_ID:0:7}
-              fi
+            scripts/push_cloudformation_stack.sh broainetwork cloudformation/network.yaml ${CIRCLE_WORKFLOW_ID:0:7}
+          no_output_timeout: 30m
       - run:
           name: Prepare cluster for AWS EKS cluster
           working_directory: .circleci
           command: |
-            STACK_EXISTS=$(aws cloudformation list-stacks --stack-status-filter CREATE_COMPLETE ----query "StackSummaries[*].StackName" | grep "broaicluster")      
-            if [[ -z "$STACK_EXISTS" ]]
-              then  
-                scripts/push_cloudformation_stack.sh broaicluster cloudformation/cluster.yaml ${CIRCLE_WORKFLOW_ID:0:7} 
-              fi
+            scripts/push_cloudformation_stack.sh broaicluster cloudformation/cluster.yaml ${CIRCLE_WORKFLOW_ID:0:7} 
+          no_output_timeout: 30m
       - destroy-environment:
           when: on_fail 
-
 
   deploy-k8-infrastructure:
     executor: eks
@@ -182,7 +182,9 @@ jobs:
           command: |
             mkdir .kube
             aws eks --region us-west-2 update-kubeconfig --kubeconfig .kube/config-aws --name AWSK8SCluster
-            ./run_kube_aws.sh
+            sh run_kube_aws.sh
+            kubectl --kubeconfig .kube/config-aws get svc
+            kubectl --kubeconfig .kube/config-aws get pods
       - destroy-environment:
           when: on_fail 
 
@@ -204,14 +206,19 @@ jobs:
               then
                 kubectl --kubeconfig .kube/config-aws rollout restart deployment broai-blue
                 kubectl --kubeconfig .kube/config-aws apply -f broai_kubernetes/loadbalancer-aws-service-blue-main.yaml
-            elif [[ ${CIRCLE_BRANCH} == "main" ]]
-              then
-                kubectl --kubeconfig .kube/config-aws rollout restart deployment broai-green
-                kubectl --kubeconfig .kube/config-aws apply -f broai_kubernetes/loadbalancer-aws-service-green-main.yaml
             fi
+            kubectl --kubeconfig .kube/config-aws get svc
+            kubectl --kubeconfig .kube/config-aws get pods
+      - destroy-environment:
+          when: on_fail 
+
+  smoketest:
+    executor: python
+    steps:
+      - checkout    
 
   cleanup:
-     executor: aws
+    executor: aws
     steps:
       - checkout
       - aws-install-dependencies
@@ -255,16 +262,16 @@ workflows:
             branches:
               only:
                 - main 
-      - build-upload-container:
-          requires: [lint-dockerfiles]
-          context:
-            - dockerhub
-          filters:
-            branches:
-              only:
-                - main 
+      #- build-upload-container:
+      #    requires: [lint-dockerfiles]
+      #    context:
+      #      - dockerhub
+      #    filters:
+      #      branches:
+      #        only:
+      #          - main 
       - prep-infrastructure-aws:
-          requires: [lint-app, test-static-app, scan-app, build-upload-container]
+          requires: [lint-app, test-static-app, scan-app]
           context:
             - aws_vars
           filters:
@@ -285,7 +292,11 @@ workflows:
             - aws_vars
           filters:
             branches:
-              only: /david_udacity_project\/.*/
+              only:
+                - david_udacity_project_green
+                - david_udacity_project_blue
+      - smoketest:
+          requires: [deploy-k8-infrastructure, loadbalancer-update] 
       - cleanup:
           requires: [deploy-k8-infrastructure]
           context:

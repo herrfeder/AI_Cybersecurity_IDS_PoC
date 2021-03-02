@@ -74,8 +74,10 @@
   * zeek_kafka https://hub.docker.com/repository/docker/herrfeder/zeek_kafka (already in k8s Configs)
   * broai https://hub.docker.com/repository/docker/herrfeder/broai (already in k8s Configs)    
     
+2. You have to prepare and start minikube and run `run_kube_local.sh`:    
+    ```bash
     
-
+    ```
 
 
 

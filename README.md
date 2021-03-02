@@ -57,6 +57,7 @@ and
 
 ### Local Docker-Compose Deployment
 
+
 1. Clone the repository:
     ```bash
     git clone https://github.com/herrfeder/AI_Cybersecurity_IDS_PoC.git
@@ -125,6 +126,9 @@ and
     ```bash
     ./run_kube_aws.sh
     ```
+    
+4. Go to http://127.0.0.1:8050/
+
 
 5. Wait for finishing and check with `kubectl --kubeconfig .kube/config-aws get svc` the resulting Loadbalancer Hostnames and access them. :)
 

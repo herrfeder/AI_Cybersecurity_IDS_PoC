@@ -197,6 +197,7 @@ jobs:
           command: |
             mkdir .kube
             aws eks --region us-west-2 update-kubeconfig --kubeconfig .kube/config-aws --name AWSK8SCluster
+            kubectl --kubeconfig .kube/config-aws get svc
             if [[ ${CIRCLE_BRANCH} == "david_udacity_project_green" ]]
               then
                 kubectl --kubeconfig .kube/config-aws rollout restart deployment broai-green
@@ -289,7 +290,9 @@ workflows:
             - aws_vars
           filters:
             branches:
-              only: /david_udacity_project\/.*/
+              only:
+                - david_udacity_project_green
+                - david_udacity_project_blue
       - smoketest:
           requires: [deploy-k8-infrastructure, loadbalancer-update] 
       - cleanup:

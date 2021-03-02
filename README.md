@@ -67,10 +67,9 @@ and
 
 2. Go into Deploy Folder and `run_compose.sh` to run `file`-based or `kafka`-based Stack:
     ```
-    cd deploy
-    ./run_compose.sh kafka
+    deploy/run_compose.sh kafka
     # OR
-    ./run_compose.sh file
+    deploy/run_compose.sh file
     ```
 
   * first run will take very long because Docker Containers will be build locally and the zeek compilation and Kafka Plugin Install will take a while 

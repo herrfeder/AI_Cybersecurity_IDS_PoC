@@ -76,8 +76,50 @@
     
 2. You have to prepare and start minikube and run `run_kube_local.sh`:    
     ```bash
-    
+    cd deploy
+    ./run_kube_local.sh file
+    # OR (you can run booth as well)
+    ./run_kube_local.sh file 
     ```
+
+3. Now add local Ingress Rule to reach the broai endpoint:
+    ```bash
+    kubectl apply -f broai_kubernetes/ingress-local-service.yaml
+    # Check now these ingress service with
+    kubectl get svc
+    ```
+
+4. Now add `green.broai` and `blue.broai` with your minikube IP to your `/etc/hosts` and visit this domains. 
+
+
+### AWS Kubernetes Deployment
+
+1. You need to build the previous Compose-based stack at least once and upload the resulting Docker Container using the `upload-docker.sh` script or you relying on my public-built Container:
+  * zeek_kafka https://hub.docker.com/repository/docker/herrfeder/zeek_kafka (already in k8s Configs)
+  * broai https://hub.docker.com/repository/docker/herrfeder/broai (already in k8s Configs)    
+
+2. Install `aws-cli` and deploy the Network and Cluster Requirements with the provided AWS Cloudformation Scripts:
+    ```bash
+    cd .circleci
+
+    scripts/push_cloudformation_stack.sh broainetwork cloudformation/network.yaml <your individual id>
+    scripts/push_cloudformation_stack.sh broaicluster cloudformation/cluster.yaml <your individual id>
+    ```
+ 
+3. Get Access Token to acess your AWS EKS Cluster with kubectl:
+    ```bash
+    cd deploy
+
+    mkdir .kube
+    aws eks --region us-west-2 update-kubeconfig --kubeconfig .kube/config-aws --name AWSK8SCluster
+    ``` 
+
+4. Deploy Kubernetes Manifests:
+    ```bash
+    ./run_kube_aws.sh
+    ```
+
+5. Wait for finishing and check with `kubectl --kubeconfig .kube/config-aws get svc` the resulting Loadbalancer Hostnames and access them. :)
 
 
 

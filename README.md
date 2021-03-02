@@ -1,8 +1,9 @@
-# AI_Cybersecurity_IDS_PoC
+# AI_Cybersecurity_IDS_PoC and Davids Udacity CloudDevOps Nanodegree Capstone Project (see DevOps Deployments on installation part)
 
   * Winning Solution of BWI Data Analytics Hackathon 2020
 
 ![bwi_hackathon_badge](https://abload.de/img/bwi_dataanalyticshack7ujy4.png)
+
 
 ## App Screenshots
 
@@ -11,6 +12,8 @@
 | Monitoring Dashboard | Model Performance | Anomaly Training | Application of Models |
 |--------------------------------------|--------------------------------------|--------------------------------------|--------------------------------------|
 | ![](https://github.com/herrfeder/AI_Cybersecurity_IDS_PoC/raw/main/screenshots/analysis_dashboard.png) | ![](https://github.com/herrfeder/AI_Cybersecurity_IDS_PoC/raw/main/screenshots/model_performance.png) | ![](https://github.com/herrfeder/AI_Cybersecurity_IDS_PoC/raw/main/screenshots/train_anomaly.png) | ![](https://github.com/herrfeder/AI_Cybersecurity_IDS_PoC/raw/main/screenshots/apply_model.png) |
+
+
 
 ## Concept
 
@@ -43,10 +46,10 @@
 
 
 
-## Installation
+## Installation/Deployment (CloudDevOps Nanodegree Part)
 
 
-### Docker Instructions
+### Local Docker-Compose Deployment
 
 1. Create directory and download Dockerfile:
     ```

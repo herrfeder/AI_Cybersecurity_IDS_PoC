@@ -33,7 +33,7 @@ commands:
   destroy-environment:
     description: Destroy AWS EKS resources with specific CIRCE_WORKFLOW_ID.
     parameters:
-       when:
+      when:
         type: string
     steps:
       - run:

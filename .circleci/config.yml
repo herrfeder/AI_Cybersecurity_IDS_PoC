@@ -109,6 +109,10 @@ jobs:
             elif [[ ${CIRCLE_BRANCH} == main ]]
               then
                 make statictest
+            elif [[ ${CIRCLE_BRANCH} == david_udacity_project_blue ]]
+              then
+                echo "No test procedures implemented yet"
+                exit 0
               fi
   
   scan-app:

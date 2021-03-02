@@ -33,7 +33,7 @@ commands:
   destroy-environment:
     description: Destroy AWS EKS resources with specific CIRCE_WORKFLOW_ID.
     parameters:
-       when:
+      when:
         type: string
     steps:
       - run:
@@ -229,20 +229,28 @@ jobs:
           command: |
             mkdir .kube
             aws eks --region us-west-2 update-kubeconfig --kubeconfig .kube/config-aws --name AWSK8SCluster
-            IP_MAIN=$(kubectl --kubeconfig .kube/config-aws get svc loadbalancer-main --output jsonpath='{.spec.externalIPs[0]}')
-            echo $IP_MAIN
-            IP_DEV=$(kubectl --kubeconfig .kube/config-aws get svc loadbalancer-dev --output jsonpath='{.spec.externalIPs[0]}')
-            echo $IP_DEV
+            
+            sleep 60  
 
-            OUTPUT_MAIN=$(curl -s $IP_MAIN)
-            OUTPUT_DEV=$(curl -s $IP_DEV)
+            HOST_MAIN=$(kubectl --kubeconfig .kube/config-aws get svc loadbalancer-main --output jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+            HOST_DEV=$(kubectl --kubeconfig .kube/config-aws get svc loadbalancer-dev --output jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+           
+            echo "$HOST_MAIN"
+            echo "$HOST_DEV"
 
-            if [[ -z $(echo $OUTPUT_MAIN | grep "_dash-loading" ]]; then
-              echo "Main Endpoint not online"
-              exit 1
-            elif [[ -z $(echo $OUTPUT_DEV | grep "_dash-loading" ]]; then
-              echo "Dev Endpoint not online"
-              exit 1
+            curl "http://$HOST_MAIN"
+ 
+            OUTPUT_MAIN=$(curl -s "http://$HOST_MAIN")
+            OUTPUT_DEV=$(curl -s "http://$HOST_DEV")
+
+            if [ -z $(echo $OUTPUT_MAIN | grep "_dash-loading") ]
+              then
+                echo "Main Endpoint not online"
+                exit 1
+            elif [ -z $(echo $OUTPUT_DEV | grep "_dash-loading") ] 
+              then
+                echo "Dev Endpoint not online"
+                exit 1
             else
               echo "Dev and Main Endpoints are online and good to go :)"
               exit 0
@@ -294,14 +302,14 @@ workflows:
             branches:
               only:
                 - main 
-      #- build-upload-container:
-      #    requires: [lint-dockerfiles]
-      #    context:
-      #      - dockerhub
-      #    filters:
-      #      branches:
-      #        only:
-      #          - main 
+      - build-upload-container:
+          requires: [lint-dockerfiles]
+          context:
+            - dockerhub
+          filters:
+            branches:
+              only:
+                - main 
       - prep-infrastructure-aws:
           requires: [lint-app, test-static-app, scan-app]
           context:

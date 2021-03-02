@@ -240,8 +240,8 @@ jobs:
               echo "Dev and Main Endpoints are online and good to go :)"
               exit 0
             fi
-      - destroy-environment:
-          when: on_fail
+      #- destroy-environment:
+      #    when: on_fail
   cleanup:
     executor: aws
     steps:
@@ -287,14 +287,14 @@ workflows:
             branches:
               only:
                 - main 
-      - build-upload-container:
-          requires: [lint-dockerfiles]
-          context:
-            - dockerhub
-          filters:
-            branches:
-              only:
-                - main 
+      #- build-upload-container:
+      #    requires: [lint-dockerfiles]
+      #    context:
+      #      - dockerhub
+      #    filters:
+      #      branches:
+      #        only:
+      #          - main 
       - prep-infrastructure-aws:
           requires: [lint-app, test-static-app, scan-app]
           context:

@@ -232,8 +232,8 @@ jobs:
             TEMP_MAIN=$(kubectl --kubeconfig .kube/config-aws get svc loadbalancer-main --output jsonpath='{.status.loadBalancer.ingress[0].hostname}')
             TEMP_DEV=$(kubectl --kubeconfig .kube/config-aws get svc loadbalancer-dev --output jsonpath='{.status.loadBalancer.ingress[0].hostname}')
             
-            HOST_DEV=$(echo ${TEMP_DEV/\*\*\*\*\*\*\*\*\*/$AWS_DEFAULT_REGION})
-            HOST_MAIN=$(echo ${TEMP_MAIN/\*\*\*\*\*\*\*\*\*/$AWS_DEFAULT_REGION})
+            HOST_DEV=$(echo $TEMP_DEV | sed "s/\*\*\*\*\*\*\*\*\*/$AWS_DEFAULT_REGION/")
+            HOST_MAIN=$(echo $TEMP_MAIN | sed "s/\*\*\*\*\*\*\*\*\*/$AWS_DEFAULT_REGION/")
            
             echo $HOST_MAIN
 

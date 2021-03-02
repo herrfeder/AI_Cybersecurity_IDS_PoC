@@ -178,7 +178,8 @@ jobs:
           command: |
             mkdir .kube
             aws eks --region us-west-2 update-kubeconfig --kubeconfig .kube/config-aws --name AWSK8SCluster
-            ./run_kube_aws.sh
+            ls
+            sh run_kube_aws.sh
       - destroy-environment:
           when: on_fail 
 

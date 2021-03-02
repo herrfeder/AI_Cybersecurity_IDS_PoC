@@ -207,7 +207,7 @@ jobs:
   smoketest:
     executor: python
     steps:
-      -checkout    
+      - checkout    
 
   cleanup:
     executor: aws

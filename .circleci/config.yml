@@ -109,6 +109,10 @@ jobs:
             elif [[ ${CIRCLE_BRANCH} == main ]]
               then
                 make statictest
+            elif [[ ${CIRCLE_BRANCH} == david_udacity_project_blue ]]
+              then
+                echo "No test procedures implemented yet"
+                exit 0
               fi
   
   scan-app:
@@ -178,8 +182,9 @@ jobs:
           command: |
             mkdir .kube
             aws eks --region us-west-2 update-kubeconfig --kubeconfig .kube/config-aws --name AWSK8SCluster
-            ls
             sh run_kube_aws.sh
+            kubectl --kubeconfig .kube/config-aws get svc
+            kubectl --kubeconfig .kube/config-aws get pods
       - destroy-environment:
           when: on_fail 
 
@@ -202,6 +207,8 @@ jobs:
                 kubectl --kubeconfig .kube/config-aws rollout restart deployment broai-blue
                 kubectl --kubeconfig .kube/config-aws apply -f broai_kubernetes/loadbalancer-aws-service-blue-main.yaml
             fi
+            kubectl --kubeconfig .kube/config-aws get svc
+            kubectl --kubeconfig .kube/config-aws get pods
       - destroy-environment:
           when: on_fail 
 
@@ -285,7 +292,9 @@ workflows:
             - aws_vars
           filters:
             branches:
-              only: /david_udacity_project\/.*/
+              only:
+                - david_udacity_project_green
+                - david_udacity_project_blue
       - smoketest:
           requires: [deploy-k8-infrastructure, loadbalancer-update] 
       - cleanup:

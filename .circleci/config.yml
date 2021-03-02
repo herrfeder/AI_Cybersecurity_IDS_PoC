@@ -321,7 +321,9 @@ workflows:
                 - david_udacity_project_green
                 - david_udacity_project_blue
       - smoketest:
-          requires: [deploy-k8-infrastructure, loadbalancer-update] 
+          requires: [deploy-k8-infrastructure, loadbalancer-update]
+          context:
+            - aws_vars
       - cleanup:
           requires: [deploy-k8-infrastructure]
           context:

@@ -25,7 +25,7 @@ commands:
   source-venv:
     description: source the python virtual environment
     steps:
-       - run:
+      - run:
           name: Source existing environment
           command: |
             echo "source .devops/bin/activate" >> $BASH_ENV
@@ -36,19 +36,26 @@ commands:
        when:
         type: string
     steps:
-     - run:
-         name: Check existence of aws cli and install it
-         command: sh .circleci/scripts/check_aws.sh
-         when: << parameters.when >>
-     - run:
-         name: Destroy cluster
-         command: aws cloudformation delete-stack --stack-name "broaicluster"
-         when: << parameters.when >>
-     - run:
-         name: Destroy network
-         command: |
-           aws cloudformation delete-stack --stack-name "broainetwork"
-         when: << parameters.when >>
+      - run:
+          name: Delete all k8s resources
+          command: |
+            mkdir .kube
+            aws eks --region us-west-2 update-kubeconfig --kubeconfig .kube/config-aws --name AWSK8SCluster
+            kubectl --kubeconfig .kube/config-aws delete all --all
+          when: << parameters.when >>
+      - run:
+          name: Check existence of aws cli and install it
+          command: sh .circleci/scripts/check_aws.sh
+          when: << parameters.when >>
+      - run:
+          name: Destroy cluster
+          command: aws cloudformation delete-stack --stack-name "broaicluster"
+          when: << parameters.when >>
+      - run:
+          name: Destroy network
+          command: |
+            aws cloudformation delete-stack --stack-name "broainetwork"
+          when: << parameters.when >>
 
 jobs:
 

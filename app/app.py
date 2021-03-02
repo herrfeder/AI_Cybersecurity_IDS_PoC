@@ -400,7 +400,7 @@ APPLY_FRONTEND = [dbc.Row(children=[html.Div(children=[], id="apply_dummy"),
 
 app = dash.Dash(__name__,
                 external_stylesheets=[dbc.themes.DARKLY],
-                url_base_pathname="/aicspoc/",
+                url_base_pathname="/",
                 meta_tags=[
                     {"name": "viewport",
                         "content": "width=device-width, initial-scale=1.0"}

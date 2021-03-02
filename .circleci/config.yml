@@ -255,8 +255,8 @@ jobs:
               echo "Dev and Main Endpoints are online and good to go :)"
               exit 0
             fi
-      #- destroy-environment:
-      #    when: on_fail
+      - destroy-environment:
+          when: on_fail
   cleanup:
     executor: aws
     steps:

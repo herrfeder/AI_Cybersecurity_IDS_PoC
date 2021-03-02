@@ -182,8 +182,9 @@ jobs:
           command: |
             mkdir .kube
             aws eks --region us-west-2 update-kubeconfig --kubeconfig .kube/config-aws --name AWSK8SCluster
-            ls
             sh run_kube_aws.sh
+            kubectl --kubeconfig .kube/config-aws get svc
+            kubectl --kubeconfig .kube/config-aws get pods
       - destroy-environment:
           when: on_fail 
 
@@ -197,7 +198,6 @@ jobs:
           command: |
             mkdir .kube
             aws eks --region us-west-2 update-kubeconfig --kubeconfig .kube/config-aws --name AWSK8SCluster
-            kubectl --kubeconfig .kube/config-aws get svc
             if [[ ${CIRCLE_BRANCH} == "david_udacity_project_green" ]]
               then
                 kubectl --kubeconfig .kube/config-aws rollout restart deployment broai-green
@@ -207,6 +207,8 @@ jobs:
                 kubectl --kubeconfig .kube/config-aws rollout restart deployment broai-blue
                 kubectl --kubeconfig .kube/config-aws apply -f broai_kubernetes/loadbalancer-aws-service-blue-main.yaml
             fi
+            kubectl --kubeconfig .kube/config-aws get svc
+            kubectl --kubeconfig .kube/config-aws get pods
       - destroy-environment:
           when: on_fail 
 

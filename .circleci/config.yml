@@ -317,7 +317,7 @@ workflows:
               only:
                 - main 
       - deploy-k8-infrastructure:
-          requires: [prep-infrastructure-aws]
+          requires: [prep-infrastructure-aws, build-upload-container]
           context:
             - aws_vars
           filters:

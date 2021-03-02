@@ -243,11 +243,11 @@ jobs:
             OUTPUT_MAIN=$(curl -s "http://$HOST_MAIN")
             OUTPUT_DEV=$(curl -s "http://$HOST_DEV")
 
-            if [[ -z $(echo $OUTPUT_MAIN) | grep "_dash-loading" ]] 
+            if [ -z $(echo $OUTPUT_MAIN) | grep "_dash-loading" ] 
               then
                 echo "Main Endpoint not online"
                 exit 1
-            elif [[ -z $(echo $OUTPUT_DEV) | grep "_dash-loading" ]]
+            elif [ -z $(echo $OUTPUT_DEV) | grep "_dash-loading" ]
               then
                 echo "Dev Endpoint not online"
                 exit 1
@@ -302,14 +302,14 @@ workflows:
             branches:
               only:
                 - main 
-      #- build-upload-container:
-      #    requires: [lint-dockerfiles]
-      #    context:
-      #      - dockerhub
-      #    filters:
-      #      branches:
-      #        only:
-      #          - main 
+      - build-upload-container:
+          requires: [lint-dockerfiles]
+          context:
+            - dockerhub
+          filters:
+            branches:
+              only:
+                - main 
       - prep-infrastructure-aws:
           requires: [lint-app, test-static-app, scan-app]
           context:

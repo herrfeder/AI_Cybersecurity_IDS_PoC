@@ -49,7 +49,7 @@ commands:
           when: << parameters.when >>
       - run:
           name: Destroy cluster
-          cbearengineer/awscli-kubectlommand: aws cloudformation delete-stack --stack-name "broaicluster01"
+          command: aws cloudformation delete-stack --stack-name "broaicluster01"
           when: << parameters.when >>
       - run:
           name: Destroy network

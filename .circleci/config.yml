@@ -37,24 +37,17 @@ commands:
         type: string
     steps:
       - run:
-          name: Delete all k8s resources
-          command: |
-            mkdir .kube
-            aws eks --region us-west-2 update-kubeconfig --kubeconfig .kube/config-aws --name AWSK8SCluster
-            kubectl --kubeconfig .kube/config-aws delete all --all
-          when: << parameters.when >>
-      - run:
           name: Check existence of aws cli and install it
           command: sh .circleci/scripts/check_aws.sh
           when: << parameters.when >>
       - run:
           name: Destroy cluster
-          command: aws cloudformation delete-stack --stack-name "broaicluster01"
+          command: aws cloudformation delete-stack --region us-west-2 --stack-name "broaicluster01"
           when: << parameters.when >>
       - run:
           name: Destroy network
           command: |
-            aws cloudformation delete-stack --stack-name "broainetwork01"
+            aws cloudformation delete-stack --region us-west-2 --stack-name "broainetwork01"
           when: << parameters.when >>
 
 jobs:
@@ -230,31 +223,29 @@ jobs:
             mkdir .kube
             aws eks --region us-west-2 update-kubeconfig --kubeconfig .kube/config-aws --name AWSK8SCluster
             
-            sleep 60  
-
+            sleep 5m 
+            
             HOST_MAIN=$(kubectl --kubeconfig .kube/config-aws get svc loadbalancer-main --output jsonpath='{.status.loadBalancer.ingress[0].hostname}')
             HOST_DEV=$(kubectl --kubeconfig .kube/config-aws get svc loadbalancer-dev --output jsonpath='{.status.loadBalancer.ingress[0].hostname}')
            
             echo "$HOST_MAIN"
             echo "$HOST_DEV"
-
-            curl "http://$HOST_MAIN"
  
             OUTPUT_MAIN=$(curl -s "http://$HOST_MAIN")
             OUTPUT_DEV=$(curl -s "http://$HOST_DEV")
 
-            if [ -z $(echo $OUTPUT_MAIN | grep "_dash-loading") ] 
+            if [ -z $(echo $OUTPUT_MAIN | grep "_dash-loading") ]
               then
                 echo "Main Endpoint not online"
                 exit 1
-            elif [ -z $(echo $OUTPUT_DEV | grep "_dash-loading") ]
+            elif [ -z $(echo $OUTPUT_DEV | grep "_dash-loading") ] 
               then
                 echo "Dev Endpoint not online"
                 exit 1
             else
               echo "Dev and Main Endpoints are online and good to go :)"
               exit 0
-            fi
+            fi 
       - destroy-environment:
           when: on_fail
   cleanup:
@@ -319,7 +310,7 @@ workflows:
               only:
                 - main 
       - deploy-k8-infrastructure:
-          requires: [prep-infrastructure-aws]
+          requires: [prep-infrastructure-aws, build-upload-container]
           context:
             - aws_vars
           filters:

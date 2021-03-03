@@ -1,0 +1,24 @@
+## Links
+
+### Green/Blue Pipeline Screenshots
+
+  * Main: https://github.com/herrfeder/AI_Cybersecurity_IDS_PoC/blob/main/screenshots/capstone_broai_main_pipeline.png
+  * Dev: https://github.com/herrfeder/AI_Cybersecurity_IDS_PoC/blob/main/screenshots/capstone_broai_branch_pipeline.png
+    * with sucessful pipeline the `loadbalancer-update` will swith the Main and Dev Endpoints
+
+### Linting/Scanning/Testing Screenshots
+
+  * https://github.com/herrfeder/AI_Cybersecurity_IDS_PoC/blob/main/screenshots/capstone_broai_dockerlinting.png
+  * https://github.com/herrfeder/AI_Cybersecurity_IDS_PoC/blob/main/screenshots/capstone_broai_securityscan.png
+  * https://github.com/herrfeder/AI_Cybersecurity_IDS_PoC/blob/main/screenshots/capstone_broai_statictest.png
+  * https://github.com/herrfeder/AI_Cybersecurity_IDS_PoC/blob/main/screenshots/capstone_broai_linting.png
+
+### Deployments
+
+  * Green Deployment: http://a675b5ad97c0c4d2b827697b9355a156-32535431.us-west-2.elb.amazonaws.com/
+  * Blue Deployment: http://aea065a416e1d44d7bed3ebbc8e03133-1626769882.us-west-2.elb.amazonaws.com/
+
+### Docker Builds
+
+  * Docker Build Broai: https://hub.docker.com/repository/docker/herrfeder/broai
+  * Docker Build Zeek with Kafka Plugin: https://hub.docker.com/repository/docker/herrfeder/zeek_kafka

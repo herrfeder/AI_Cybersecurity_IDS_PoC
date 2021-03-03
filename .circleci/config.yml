@@ -37,13 +37,6 @@ commands:
         type: string
     steps:
       - run:
-          name: Delete all k8s resources
-          command: |
-            mkdir .kube
-            aws eks --region us-west-2 update-kubeconfig --kubeconfig .kube/config-aws --name AWSK8SCluster
-            kubectl --kubeconfig .kube/config-aws delete all --all
-          when: << parameters.when >>
-      - run:
           name: Check existence of aws cli and install it
           command: sh .circleci/scripts/check_aws.sh
           when: << parameters.when >>
@@ -230,7 +223,7 @@ jobs:
             mkdir .kube
             aws eks --region us-west-2 update-kubeconfig --kubeconfig .kube/config-aws --name AWSK8SCluster
             
-            sleep 60  
+            sleep 5m 
             
             HOST_MAIN=$(kubectl --kubeconfig .kube/config-aws get svc loadbalancer-main --output jsonpath='{.status.loadBalancer.ingress[0].hostname}')
             HOST_DEV=$(kubectl --kubeconfig .kube/config-aws get svc loadbalancer-dev --output jsonpath='{.status.loadBalancer.ingress[0].hostname}')
@@ -253,8 +246,8 @@ jobs:
               echo "Dev and Main Endpoints are online and good to go :)"
               exit 0
             fi 
-      #- destroy-environment:
-      #    when: on_fail
+      - destroy-environment:
+          when: on_fail
   cleanup:
     executor: aws
     steps:

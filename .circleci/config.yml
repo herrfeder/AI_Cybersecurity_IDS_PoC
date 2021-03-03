@@ -25,7 +25,7 @@ commands:
   source-venv:
     description: source the python virtual environment
     steps:
-       - run:
+      - run:
           name: Source existing environment
           command: |
             echo "source .devops/bin/activate" >> $BASH_ENV
@@ -33,22 +33,22 @@ commands:
   destroy-environment:
     description: Destroy AWS EKS resources with specific CIRCE_WORKFLOW_ID.
     parameters:
-       when:
+      when:
         type: string
     steps:
-     - run:
-         name: Check existence of aws cli and install it
-         command: sh .circleci/scripts/check_aws.sh
-         when: << parameters.when >>
-     - run:
-         name: Destroy cluster
-         command: aws cloudformation delete-stack --stack-name "broaicluster"
-         when: << parameters.when >>
-     - run:
-         name: Destroy network
-         command: |
-           aws cloudformation delete-stack --stack-name "broainetwork"
-         when: << parameters.when >>
+      - run:
+          name: Check existence of aws cli and install it
+          command: sh .circleci/scripts/check_aws.sh
+          when: << parameters.when >>
+      - run:
+          name: Destroy cluster
+          command: aws cloudformation delete-stack --region us-west-2 --stack-name "broaicluster01"
+          when: << parameters.when >>
+      - run:
+          name: Destroy network
+          command: |
+            aws cloudformation delete-stack --region us-west-2 --stack-name "broainetwork01"
+          when: << parameters.when >>
 
 jobs:
 
@@ -161,13 +161,13 @@ jobs:
           name: Prepare network for AWS EKS cluster
           working_directory: .circleci
           command: |
-            scripts/push_cloudformation_stack.sh broainetwork cloudformation/network.yaml ${CIRCLE_WORKFLOW_ID:0:7}
+            scripts/push_cloudformation_stack.sh broainetwork01 cloudformation/network.yaml ${CIRCLE_WORKFLOW_ID:0:7}
           no_output_timeout: 30m
       - run:
           name: Prepare cluster for AWS EKS cluster
           working_directory: .circleci
           command: |
-            scripts/push_cloudformation_stack.sh broaicluster cloudformation/cluster.yaml ${CIRCLE_WORKFLOW_ID:0:7} 
+            scripts/push_cloudformation_stack.sh broaicluster01 cloudformation/cluster.yaml ${CIRCLE_WORKFLOW_ID:0:7} 
           no_output_timeout: 30m
       - destroy-environment:
           when: on_fail 
@@ -213,10 +213,41 @@ jobs:
           when: on_fail 
 
   smoketest:
-    executor: python
+    executor: eks
     steps:
       - checkout    
+      - run:
+          name: Get LoadBalancer External IPs and checking Availability
+          working_directory: deploy
+          command: |
+            mkdir .kube
+            aws eks --region us-west-2 update-kubeconfig --kubeconfig .kube/config-aws --name AWSK8SCluster
+            
+            sleep 5m 
+            
+            HOST_MAIN=$(kubectl --kubeconfig .kube/config-aws get svc loadbalancer-main --output jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+            HOST_DEV=$(kubectl --kubeconfig .kube/config-aws get svc loadbalancer-dev --output jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+           
+            echo "$HOST_MAIN"
+            echo "$HOST_DEV"
+ 
+            OUTPUT_MAIN=$(curl -s "http://$HOST_MAIN")
+            OUTPUT_DEV=$(curl -s "http://$HOST_DEV")
 
+            if [ -z $(echo $OUTPUT_MAIN | grep "_dash-loading") ]
+              then
+                echo "Main Endpoint not online"
+                exit 1
+            elif [ -z $(echo $OUTPUT_DEV | grep "_dash-loading") ] 
+              then
+                echo "Dev Endpoint not online"
+                exit 1
+            else
+              echo "Dev and Main Endpoints are online and good to go :)"
+              exit 0
+            fi 
+      - destroy-environment:
+          when: on_fail
   cleanup:
     executor: aws
     steps:
@@ -262,14 +293,14 @@ workflows:
             branches:
               only:
                 - main 
-      #- build-upload-container:
-      #    requires: [lint-dockerfiles]
-      #    context:
-      #      - dockerhub
-      #    filters:
-      #      branches:
-      #        only:
-      #          - main 
+      - build-upload-container:
+          requires: [lint-dockerfiles]
+          context:
+            - dockerhub
+          filters:
+            branches:
+              only:
+                - main 
       - prep-infrastructure-aws:
           requires: [lint-app, test-static-app, scan-app]
           context:
@@ -279,7 +310,7 @@ workflows:
               only:
                 - main 
       - deploy-k8-infrastructure:
-          requires: [prep-infrastructure-aws]
+          requires: [prep-infrastructure-aws, build-upload-container]
           context:
             - aws_vars
           filters:
@@ -296,7 +327,9 @@ workflows:
                 - david_udacity_project_green
                 - david_udacity_project_blue
       - smoketest:
-          requires: [deploy-k8-infrastructure, loadbalancer-update] 
+          requires: [deploy-k8-infrastructure, loadbalancer-update]
+          context:
+            - aws_vars
       - cleanup:
           requires: [deploy-k8-infrastructure]
           context:

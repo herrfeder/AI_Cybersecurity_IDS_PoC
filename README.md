@@ -1,4 +1,4 @@
-[![CircleCI](https://circleci.com/gh/herrfeder/AI_Cybersecurity_IDS_PoC.svg?style=svg)]
+[![CircleCI](https://circleci.com/gh/herrfeder/AI_Cybersecurity_IDS_PoC.svg?style=svg)](https://app.circleci.com/pipelines/github/herrfeder/AI_Cybersecurity_IDS_PoC/86/workflows/1c2fe7ae-4c19-412a-80f4-9c6b9cf2139a)
 
 # AI_Cybersecurity_IDS_PoC 
 and 
